@@ -5,53 +5,58 @@ namespace MovieDatabase
 {
     class Program
     {
-        private const string folderName = "MyIMDBSearcher";
-        private const string fileTitleBasics = "title.basics.tsv";
-        private const string fileTitleRatings = "title.ratings.tsv";
-        private const string fileTitleEpisodes = "title.episode.tsv";
-        private const string fileNameBasics = "name.basics.tsv";
-
         static void Main(string[] args)
         {
-            string folderPath = Path.Combine(
-            Environment.GetFolderPath
-            (Environment.SpecialFolder.LocalApplicationData), folderName);
+            Program p = new Program();
 
-            string fileTitleBasicsPath = 
-                Path.Combine(folderPath, fileTitleBasics);
-            string fileTitleRatingsPath = 
-                Path.Combine(folderPath, fileTitleRatings);
-            string fileTitleEpisodesPath = 
-                Path.Combine(folderPath, fileTitleEpisodes);
-            string fileNameBasicsPath = 
-                Path.Combine(folderPath, fileNameBasics);
+            Console.Write("Selecione uma opção: \n 1 - Títulos\n " +
+                "2 - Pessoas\n 3 - Sair\n => ");
 
-            Console.WriteLine("Selecione uma opção: \n 1 - Títulos\n " +
-                "2 - Pessoas\n 3 - Sair");
+            p.StartMenu(p);
+        }
 
+        private void StartMenu(Program p)
+        {
             string response = Console.ReadLine();
-            bool a = true;
 
-            while (a)
+            switch (response)
             {
-                switch (response)
-                {
-                    case "1":
-                        a = false;
-                        // Call method from Title class
-                        break;
-                    case "2":
-                        a = false;
-                        // Call method from Person class
-                        break;
-                    case "3":
-                        Environment.Exit(0);
-                        break;
-                    default:
-                        Console.WriteLine("Digite uma das opções disponíveis");
-                        break;
-                }
+                case "1":
+                    p.AskTitle(p);
+                    break;
+                case "2":
+
+                    break;
+                case "3":
+                    Environment.Exit(0);
+                    break;
+                default:
+                    Console.WriteLine("Digite uma das opções disponíveis");
+                    break;
             }
+        }
+
+        private void AskTitle(Program p)
+        {
+            string option;
+            Query q = new Query();
+
+            Console.Write("1 - Pesquisar\n2 - Voltar\n => ");
+            option = Console.ReadLine();
+
+            if (option == "1")
+            {
+                // Call method with all the titles with the certain word
+                string s;
+                //Console.Write("Digite o que quer pesquisar.\n => ");
+                s = Console.ReadLine();
+                q.SearchTitle(s);
+            }
+            else if (option == "2")
+                // Call method of start menu
+                p.StartMenu(p);
+            else
+                Console.WriteLine("Digite uma das opções disponíveis");
         }
     }
 }

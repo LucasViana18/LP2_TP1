@@ -21,6 +21,9 @@ namespace MovieDatabase
         private string fileTitleEpisodesPath;
         private string fileNameBasicsPath;
 
+        private List<Title> titles;
+        public IEnumerable<Title> FilteredTitles { get; private set; }
+
         public Query()
         {
             folderPath = Path.Combine
@@ -35,30 +38,56 @@ namespace MovieDatabase
                 Path.Combine(folderPath, fileTitleEpisodes);
             fileNameBasicsPath =
                 Path.Combine(folderPath, fileNameBasics);
+            
+            titles = new List<Title>();
+            FilteredTitles = new List<Title>();
         }
 
-        public void SearchTitle(string s)
+        public void LoadTitle()
         {
+            // Local variables
+            string line;
+            string[] tempArray;
+            string lastLine = null;
+
+            // Process of descompress and being able to read the file
             FileStream fs = new FileStream(fileTitleBasicsPath, FileMode.Open, FileAccess.Read);
-
             GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
-
             StreamReader sr = new StreamReader(gz);
 
-            List<string[]> l = new List<string[]>();
+            // To ignore the first line(categories)
+            sr.ReadLine();
 
-            for(int i = 0; i < 5; i++)
+            // Loop through all the lines and store it in the titles list
+            while ((line = sr.ReadLine()) != null)
             {
-                l.Add(sr.ReadLine().Split('\t'));
+                line += "\t0";
+                if (line != lastLine)
+                {
+                    tempArray = line.Split('\t');
+                    titles.Add(new Title(tempArray));
+                }
+                lastLine = line;
             }
+            // Close the stream reader
+            sr.Close();
 
-            // Fechar ficheiro
-            /*sr.Close();
-            IEnumerable<string> titles5060 =
-                from title in l
-                where title.startYear > 1950
-                select title.primaryTitle;
-                */
+        }
+
+        public void ProcessTitle (string name)
+        {
+            int ID = 0;
+            // Select the titles with the certain word typed by the user
+            FilteredTitles =
+                (from x in titles
+
+                 where x.PrimaryTitle.ToLower().Contains(name)
+
+                 select new Title(new string[]
+                     {x.Tconst, x.TitleType, x.PrimaryTitle, x.OriginalTitle,
+                    x.IsAdult.ToString(), x.StartYear.ToString(),
+                    x.EndYear.ToString(), x.RuntimeMinutes.ToString(),
+                    x.Genres, (ID++).ToString()})).ToList();
         }
     }
 }

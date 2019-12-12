@@ -8,21 +8,23 @@ namespace MovieDatabase
         static void Main(string[] args)
         {
             Program p = new Program();
+            Query q = new Query();
 
+            q.LoadTitle();
             Console.Write("Selecione uma opção: \n 1 - Títulos\n " +
                 "2 - Pessoas\n 3 - Sair\n => ");
 
-            p.StartMenu(p);
+            p.StartMenu(q);
         }
 
-        private void StartMenu(Program p)
+        private void StartMenu(Query q)
         {
             string response = Console.ReadLine();
 
             switch (response)
             {
                 case "1":
-                    p.AskTitle(p);
+                    AskTitle(q);
                     break;
                 case "2":
 
@@ -36,10 +38,9 @@ namespace MovieDatabase
             }
         }
 
-        private void AskTitle(Program p)
+        public void AskTitle(Query q)
         {
             string option;
-            Query q = new Query();
 
             Console.Write("1 - Pesquisar\n2 - Voltar\n => ");
             option = Console.ReadLine();
@@ -50,13 +51,28 @@ namespace MovieDatabase
                 string s;
                 //Console.Write("Digite o que quer pesquisar.\n => ");
                 s = Console.ReadLine();
-                q.SearchTitle(s);
+                ShowTitles(s,q);
             }
             else if (option == "2")
                 // Call method of start menu
-                p.StartMenu(p);
+                StartMenu(q);
             else
                 Console.WriteLine("Digite uma das opções disponíveis");
         }
+
+        public void ShowTitles(string response, Query q)
+        {
+            q.ProcessTitle(response);
+
+            foreach (Title field in q.FilteredTitles)
+            {
+                Console.WriteLine("-------------------------------------------------------");
+                Console.WriteLine
+                    ("(" + field.ID + ") " + field.TitleType + " | " + field.PrimaryTitle + " | " + field.IsAdult + " | " +
+                    field.StartYear + " | " + field.EndYear + " | " + field.RuntimeMinutes + " | " +
+                    field.Genres + "  - " + field.Tconst + "\n");
+            }
+        }
+
     }
 }

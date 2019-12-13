@@ -13,6 +13,7 @@ namespace MovieDatabase
             Console.WriteLine("Loading. Please wait...");
             q.LoadRating();
             q.LoadTitle();
+            q.LoadEpisode();
             Console.Clear();
             Console.Write("Selecione uma opção: \n 1 - Títulos\n " +
                 "2 - Pessoas\n 3 - Sair\n => ");

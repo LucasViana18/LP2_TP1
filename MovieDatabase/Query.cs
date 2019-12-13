@@ -25,6 +25,7 @@ namespace MovieDatabase
 
         private List<Title> titles;
         private List<Rating> ratings;
+        private List<Episode> episodes;
         public IEnumerable<Title> FilteredTitles { get; private set; }
         public IEnumerable<Details> FilteredDetails { get; private set; }
 
@@ -44,7 +45,8 @@ namespace MovieDatabase
                 Path.Combine(folderPath, fileNameBasics);
             
             titles = new List<Title>();
-            ratings = new List<Rating>();            
+            ratings = new List<Rating>();
+            episodes = new List<Episode>();
             FilteredTitles = new List<Title>();
             FilteredDetails = new List<Details>();
         }
@@ -102,6 +104,36 @@ namespace MovieDatabase
                 {
                     tempArray = line.Split('\t');
                     ratings.Add(new Rating(tempArray));
+                }
+                lastLine = line;
+            }
+            // Close the stream reader
+            sr.Close();
+        }
+
+        public void LoadEpisode()
+        {
+            // Local variables
+            string line;
+            string[] tempArray;
+            string lastLine = null;
+
+            // Process of descompress and being able to read the file
+            FileStream fs = new FileStream(fileTitleEpisodesPath, FileMode.Open, FileAccess.Read);
+            GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
+            StreamReader sr = new StreamReader(gz);
+
+            // To ignore the first line(categories)
+            sr.ReadLine();
+
+            // Loop through all the lines and store it in the titles list
+            while ((line = sr.ReadLine()) != null)
+            {
+                line += "\t0";
+                if (line != lastLine)
+                {
+                    tempArray = line.Split('\t');
+                    episodes.Add(new Episode(tempArray));
                 }
                 lastLine = line;
             }

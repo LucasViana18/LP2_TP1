@@ -13,6 +13,7 @@ namespace MovieDatabase
             Console.WriteLine("Loading. Please wait...");
             q.LoadRating();
             q.LoadTitle();
+            q.LoadEpisode();
             Console.Clear();
             Console.Write("Selecione uma opção: \n 1 - Títulos\n " +
                 "2 - Pessoas\n 3 - Sair\n => ");
@@ -54,7 +55,7 @@ namespace MovieDatabase
                 string s;
                 Console.Write("Digite o que quer pesquisar.\n => ");
                 s = Console.ReadLine();
-                ShowTitles(s,q);
+                ShowTitles(s, q);
             }
             else if (option == "2")
                 // Call method of start menu
@@ -111,6 +112,87 @@ namespace MovieDatabase
                 Console.WriteLine("End Year: \t" + field.EndYear + "\n");
                 Console.WriteLine("Duration: \t" + field.RuntimeMinutes + "\n");
                 Console.WriteLine("Adults Only: \t" + field.IsAdult + "\n");
+
+                if (field.TitleType == "tvEpisode")
+                {
+                    Console.WriteLine("From the series: \t" + field.ParentTitle + "\n");
+                    Console.WriteLine("Season: \t" + field.SeasonNumber + "\n");
+                    Console.WriteLine("Episode: \t" + field.EpisodeNumber + "\n");
+                }
+                AskGeneric(q);
+            }
+        }
+
+        public void AskGeneric(Query q)
+        {
+            string option;
+
+            Console.WriteLine("-----------------------------------------");
+            Console.WriteLine("\n1 - See the series (if the title selected is an episode)\n");
+            Console.WriteLine("2 - See all episodes (if the title selected is a series)\n");
+            Console.WriteLine("3 - See all people that got into this title\n");
+            Console.Write("4 - Go back to main menu\n --> ");
+
+            option = Console.ReadLine();
+
+            switch (option)
+            {
+                case "1":
+                    ShowParent(q);
+                    break;
+                case "2":
+                    ShowChildren(q);
+                    break;
+                case "3":
+                    //ShowPeopleInTitle();
+                    break;
+                case "4":
+                    StartMenu(q);
+                    break;
+            }
+        }
+
+        public void ShowParent(Query q)
+        {
+            Console.Clear();
+
+            q.ProcessParent();
+            Console.WriteLine("Here is the tv series of that episode. It might take some time.");
+            foreach (Details field in q.FilteredParent)
+            {
+                Console.WriteLine("Code: \t" + field.Tconst + "\n");
+                Console.WriteLine("Name: \t" + field.PrimaryTitle + "\n");
+                Console.WriteLine("Original Name: \t" + field.OriginalTitle + "\n");
+                Console.WriteLine("Title Type: \t" + field.TitleType + "\n");
+                Console.WriteLine("Genre: \t" + field.Genres + "\n");
+                Console.WriteLine("Average Rating: \t" + field.AverageRating + "\n");
+                Console.WriteLine("Number of Votes: \t" + field.numVotes + "\n");
+                Console.WriteLine("Start Year: \t" + field.StartYear + "\n");
+                Console.WriteLine("End Year: \t" + field.EndYear + "\n");
+                Console.WriteLine("Duration: \t" + field.RuntimeMinutes + "\n");
+                Console.WriteLine("Adults Only: \t" + field.IsAdult + "\n");
+            }
+            Console.WriteLine("-----------------------------END------------------------------------\n");
+            AskGeneric(q);
+        }
+
+        public void ShowChildren(Query q)
+        {
+            Console.Clear();
+
+            q.ProcessEpisode();
+            Console.WriteLine("Here are the episodes of the series.\n");
+            Console.WriteLine("--------------------------CATEGORIES--------------------------------");
+            Console.WriteLine("Type | Primary Title | For adults? | " +
+                    "Start Year | End Year | Minutes | Genre\n");
+            // Loop that goes through the list of titles that contains the word/s that the user typed
+            foreach (Details field in q.FilteredEpisodes)
+            {
+                Console.WriteLine("-------------------------------------------------------");
+                Console.WriteLine
+                    ("(" + field.ID + ") " + field.TitleType + "| " + field.PrimaryTitle + " | " + field.IsAdult + " | " +
+                    field.StartYear + " | " + field.EndYear + " | " + field.RuntimeMinutes + " |" +
+                    field.Genres + "  - " + field.AverageRating + " - " + field.SeasonNumber + " - " + field.EpisodeNumber + " - " + field.Tconst + "\n");
             }
         }
     }

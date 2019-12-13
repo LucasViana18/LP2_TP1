@@ -28,6 +28,7 @@ namespace MovieDatabase
         private List<Episode> episodes;
         public IEnumerable<Title> FilteredTitles { get; private set; }
         public IEnumerable<Details> FilteredDetails { get; private set; }
+        public IEnumerable<Details> FilteredParent { get; private set; }
 
         public Query()
         {
@@ -43,7 +44,7 @@ namespace MovieDatabase
                 Path.Combine(folderPath, fileTitleEpisodes);
             fileNameBasicsPath =
                 Path.Combine(folderPath, fileNameBasics);
-            
+
             titles = new List<Title>();
             ratings = new List<Rating>();
             episodes = new List<Episode>();
@@ -141,7 +142,7 @@ namespace MovieDatabase
             sr.Close();
         }
 
-        public void ProcessTitle (string name)
+        public void ProcessTitle(string name)
         {
             int ID = 0;
             // Select the titles with the certain word typed by the user
@@ -188,6 +189,27 @@ namespace MovieDatabase
                     f.Genres, oR?.AverageRating.ToString() ?? noRating,
                     oR?.NumVotes.ToString() ?? noRating, oE?.SeasonNumber ?? "",
                     oE?.EpisodeNumber ?? "", GetParentTitle(oE?.ParentTconst ?? ""), "" })).ToList();
+        }
+
+        public void ProcessParent()
+        {
+            FilteredParent =
+                from d in FilteredDetails
+                join e in episodes on d.Tconst equals e.Tconst
+                join t in titles on e.ParentTconst equals t.Tconst
+                join r in ratings on t.Tconst equals r.Tconst into gj
+
+                from l in gj.DefaultIfEmpty()
+
+                select new Details
+                (new string[]
+                {   t.Tconst, t.TitleType, t.PrimaryTitle, t.OriginalTitle,
+                    t.IsAdult.ToString(), t.StartYear.ToString(),
+                    t.EndYear.ToString(), t.RuntimeMinutes.ToString(),
+                    t.Genres, l?.AverageRating.ToString() ?? noRating,
+                    l?.NumVotes.ToString() ?? noRating, e.SeasonNumber, e.EpisodeNumber,
+                    "", ""
+                });
         }
     }
 }

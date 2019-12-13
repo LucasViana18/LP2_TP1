@@ -15,6 +15,8 @@ namespace MovieDatabase
         private const string fileTitleEpisodes = "title.episode.tsv.gz";
         private const string fileNameBasics = "name.basics.tsv.gz";
 
+        private const string noRating = "There is no rating for this title.";
+
         private string folderPath;
         private string fileTitleBasicsPath;
         private string fileTitleRatingsPath;
@@ -24,6 +26,7 @@ namespace MovieDatabase
         private List<Title> titles;
         private List<Rating> ratings;
         public IEnumerable<Title> FilteredTitles { get; private set; }
+        public IEnumerable<Details> FilteredDetails { get; private set; }
 
         public Query()
         {
@@ -43,6 +46,7 @@ namespace MovieDatabase
             titles = new List<Title>();
             ratings = new List<Rating>();            
             FilteredTitles = new List<Title>();
+            FilteredDetails = new List<Details>();
         }
 
         public void LoadTitle()
@@ -73,7 +77,36 @@ namespace MovieDatabase
             }
             // Close the stream reader
             sr.Close();
+        }
 
+        public void LoadRating()
+        {
+            // Local variables
+            string line;
+            string[] tempArray;
+            string lastLine = null;
+
+            // Process of descompress and being able to read the file
+            FileStream fs = new FileStream(fileTitleRatingsPath, FileMode.Open, FileAccess.Read);
+            GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
+            StreamReader sr = new StreamReader(gz);
+
+            // To ignore the first line(categories)
+            sr.ReadLine();
+
+            // Loop through all the lines and store it in the titles list
+            while ((line = sr.ReadLine()) != null)
+            {
+                line += "\t0";
+                if (line != lastLine)
+                {
+                    tempArray = line.Split('\t');
+                    ratings.Add(new Rating(tempArray));
+                }
+                lastLine = line;
+            }
+            // Close the stream reader
+            sr.Close();
         }
 
         public void ProcessTitle (string name)
@@ -90,6 +123,25 @@ namespace MovieDatabase
                     x.IsAdult.ToString(), x.StartYear.ToString(),
                     x.EndYear.ToString(), x.RuntimeMinutes.ToString(),
                     x.Genres, (ID++).ToString()})).ToList();
+        }
+
+        public void ProcessDetails(string selectedID)
+        {
+            FilteredDetails =
+                    (from f in FilteredTitles
+                     join r in ratings on f.Tconst equals r.Tconst into outerRating
+
+                     from oR in outerRating.DefaultIfEmpty()
+
+                     where f.ID == selectedID
+
+                     select new Details
+                     (new string[]
+                     {   f.Tconst, f.TitleType, f.PrimaryTitle, f.OriginalTitle,
+                    f.IsAdult.ToString(), f.StartYear.ToString(),
+                    f.EndYear.ToString(), f.RuntimeMinutes.ToString(),
+                    f.Genres, oR?.AverageRating.ToString() ?? noRating,
+                    oR?.NumVotes.ToString() ?? noRating, "" })).ToList();
         }
     }
 }

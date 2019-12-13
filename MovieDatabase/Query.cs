@@ -22,6 +22,7 @@ namespace MovieDatabase
         private string fileNameBasicsPath;
 
         private List<Title> titles;
+        private List<Rating> ratings;
         public IEnumerable<Title> FilteredTitles { get; private set; }
 
         public Query()
@@ -40,6 +41,7 @@ namespace MovieDatabase
                 Path.Combine(folderPath, fileNameBasics);
             
             titles = new List<Title>();
+            ratings = new List<Rating>();            
             FilteredTitles = new List<Title>();
         }
 

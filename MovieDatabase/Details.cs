@@ -18,6 +18,9 @@ namespace MovieDatabase
         public string Genres { get; set; }
         public string AverageRating { get; set; }
         public string numVotes { get; set; }
+        public string SeasonNumber { get; private set; }
+        public string EpisodeNumber { get; private set; }
+        public string ParentTitle { get; private set; }
         public string ID { get; private set; }
 
         // Constructor
@@ -35,7 +38,10 @@ namespace MovieDatabase
             Genres = array[8];
             AverageRating = array[9];
             numVotes = array[10];
-            ID = array[11];
+            SeasonNumber = array[11];
+            EpisodeNumber = array[12];
+            ParentTitle = array[13];
+            ID = array[14];
         }
     }
 }

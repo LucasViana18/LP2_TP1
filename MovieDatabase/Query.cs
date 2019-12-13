@@ -157,13 +157,26 @@ namespace MovieDatabase
                     x.Genres, (ID++).ToString()})).ToList();
         }
 
+        private string GetParentTitle(string episodeParentID)
+        {
+            if (episodeParentID != "")
+            {
+                return titles.Find(item => item.Tconst == episodeParentID).PrimaryTitle;
+            }
+            else
+            {
+                return "";
+            }
+        }
+
         public void ProcessDetails(string selectedID)
         {
             FilteredDetails =
                     (from f in FilteredTitles
                      join r in ratings on f.Tconst equals r.Tconst into outerRating
-
+                     join e in episodes on f.Tconst equals e.Tconst into outerEpisodes
                      from oR in outerRating.DefaultIfEmpty()
+                     from oE in outerEpisodes.DefaultIfEmpty()
 
                      where f.ID == selectedID
 
@@ -173,7 +186,8 @@ namespace MovieDatabase
                     f.IsAdult.ToString(), f.StartYear.ToString(),
                     f.EndYear.ToString(), f.RuntimeMinutes.ToString(),
                     f.Genres, oR?.AverageRating.ToString() ?? noRating,
-                    oR?.NumVotes.ToString() ?? noRating, "" })).ToList();
+                    oR?.NumVotes.ToString() ?? noRating, oE?.SeasonNumber ?? "",
+                    oE?.EpisodeNumber ?? "", GetParentTitle(oE?.ParentTconst ?? ""), "" })).ToList();
         }
     }
 }

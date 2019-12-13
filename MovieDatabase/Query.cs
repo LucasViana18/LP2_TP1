@@ -29,6 +29,7 @@ namespace MovieDatabase
         public IEnumerable<Title> FilteredTitles { get; private set; }
         public IEnumerable<Details> FilteredDetails { get; private set; }
         public IEnumerable<Details> FilteredParent { get; private set; }
+        public IEnumerable<Details> FilteredEpisodes { get; private set; }
 
         public Query()
         {
@@ -49,7 +50,8 @@ namespace MovieDatabase
             ratings = new List<Rating>();
             episodes = new List<Episode>();
             FilteredTitles = new List<Title>();
-            FilteredDetails = new List<Details>();
+            FilteredDetails = new List<Details>(); 
+            FilteredEpisodes = new List<Details>();
         }
 
         public void LoadTitle()
@@ -210,6 +212,30 @@ namespace MovieDatabase
                     l?.NumVotes.ToString() ?? noRating, e.SeasonNumber, e.EpisodeNumber,
                     "", ""
                 });
+        }
+
+        public void ProcessEpisode()
+        {
+            short ID = 0;
+            // Search and store into an IEnumerable the details of the episodes
+            FilteredEpisodes =
+                (from d in FilteredDetails
+                 join e in episodes on d.Tconst equals e.ParentTconst
+                 join t in titles on e.Tconst equals t.Tconst
+                 join r in ratings on t.Tconst equals r.Tconst into gj
+
+                 from l in gj.DefaultIfEmpty()
+
+                 select new Details
+                 (new string[]
+                 {
+                    t.Tconst, t.TitleType, t.PrimaryTitle, t.OriginalTitle,
+                    t.IsAdult.ToString(), t.StartYear.ToString(),
+                    t.EndYear.ToString(), t.RuntimeMinutes.ToString(),
+                    t.Genres, l?.AverageRating.ToString() ?? noRating,
+                    l?.NumVotes.ToString() ?? noRating, e.SeasonNumber, e.EpisodeNumber,
+                    "", (ID++).ToString()
+                 })).ToList();
         }
     }
 }

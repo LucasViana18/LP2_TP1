@@ -55,7 +55,7 @@ namespace MovieDatabase
                 string s;
                 Console.Write("Digite o que quer pesquisar.\n => ");
                 s = Console.ReadLine();
-                ShowTitles(s,q);
+                ShowTitles(s, q);
             }
             else if (option == "2")
                 // Call method of start menu
@@ -178,7 +178,22 @@ namespace MovieDatabase
 
         public void ShowChildren(Query q)
         {
+            Console.Clear();
 
+            q.ProcessEpisode();
+            Console.WriteLine("Here are the episodes of the series.\n");
+            Console.WriteLine("--------------------------CATEGORIES--------------------------------");
+            Console.WriteLine("Type | Primary Title | For adults? | " +
+                    "Start Year | End Year | Minutes | Genre\n");
+            // Loop that goes through the list of titles that contains the word/s that the user typed
+            foreach (Details field in q.FilteredEpisodes)
+            {
+                Console.WriteLine("-------------------------------------------------------");
+                Console.WriteLine
+                    ("(" + field.ID + ") " + field.TitleType + "| " + field.PrimaryTitle + " | " + field.IsAdult + " | " +
+                    field.StartYear + " | " + field.EndYear + " | " + field.RuntimeMinutes + " |" +
+                    field.Genres + "  - " + field.AverageRating + " - " + field.SeasonNumber + " - " + field.EpisodeNumber + " - " + field.Tconst + "\n");
+            }
         }
     }
 }

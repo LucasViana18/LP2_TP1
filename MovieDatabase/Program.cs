@@ -11,9 +11,11 @@ namespace MovieDatabase
             Query q = new Query();
 
             Console.WriteLine("Loading. Please wait...");
-            q.LoadRating();
-            q.LoadTitle();
-            q.LoadEpisode();
+            q.LoadFiles("titles");
+            q.LoadFiles("ratings");
+            q.LoadFiles("episodes");
+            q.LoadFiles("names");
+
             Console.Clear();
             Console.Write("Selecione uma opção: \n 1 - Títulos\n " +
                 "2 - Pessoas\n 3 - Sair\n => ");

@@ -26,6 +26,7 @@ namespace MovieDatabase
         private List<Title> titles;
         private List<Rating> ratings;
         private List<Episode> episodes;
+        private List<Person> people;
         public IEnumerable<Title> FilteredTitles { get; private set; }
         public IEnumerable<Details> FilteredDetails { get; private set; }
         public IEnumerable<Details> FilteredParent { get; private set; }
@@ -49,99 +50,121 @@ namespace MovieDatabase
             titles = new List<Title>();
             ratings = new List<Rating>();
             episodes = new List<Episode>();
+            people = new List<Person>();
+
             FilteredTitles = new List<Title>();
             FilteredDetails = new List<Details>(); 
             FilteredEpisodes = new List<Details>();
         }
 
-        public void LoadTitle()
+        public void LoadFiles(string fileType)
         {
             // Local variables
             string line;
             string[] tempArray;
             string lastLine = null;
 
-            // Process of descompress and being able to read the file
-            FileStream fs = new FileStream(fileTitleBasicsPath, FileMode.Open, FileAccess.Read);
-            GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
-            StreamReader sr = new StreamReader(gz);
-
-            // To ignore the first line(categories)
-            sr.ReadLine();
-
-            // Loop through all the lines and store it in the titles list
-            while ((line = sr.ReadLine()) != null)
+            Console.Clear();
+            Console.WriteLine("Reading the " + fileType + " database. Please wait...");
+            // Load the file title.basics
+            if (fileType == "titles")
             {
-                line += "\t0";
-                if (line != lastLine)
+                // Process of descompress and being able to read the file
+                FileStream fs = new FileStream(fileTitleBasicsPath, FileMode.Open, FileAccess.Read);
+                GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
+                StreamReader sr = new StreamReader(gz);
+
+                // To ignore the first line(categories)
+                sr.ReadLine();
+
+                // Loop through all the lines and store it in the titles list
+                while ((line = sr.ReadLine()) != null)
                 {
-                    tempArray = line.Split('\t');
-                    titles.Add(new Title(tempArray));
+                    line += "\t0";
+                    if (line != lastLine)
+                    {
+                        tempArray = line.Split('\t');
+                        titles.Add(new Title(tempArray));
+                    }
+                    lastLine = line;
                 }
-                lastLine = line;
+                // Close the stream reader
+                sr.Close();
             }
-            // Close the stream reader
-            sr.Close();
-        }
-
-        public void LoadRating()
-        {
-            // Local variables
-            string line;
-            string[] tempArray;
-            string lastLine = null;
-
-            // Process of descompress and being able to read the file
-            FileStream fs = new FileStream(fileTitleRatingsPath, FileMode.Open, FileAccess.Read);
-            GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
-            StreamReader sr = new StreamReader(gz);
-
-            // To ignore the first line(categories)
-            sr.ReadLine();
-
-            // Loop through all the lines and store it in the titles list
-            while ((line = sr.ReadLine()) != null)
+            // Load the file title.ratings
+            if (fileType == "ratings")
             {
-                line += "\t0";
-                if (line != lastLine)
+                // Process of descompress and being able to read the file
+                FileStream fs = new FileStream(fileTitleRatingsPath, FileMode.Open, FileAccess.Read);
+                GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
+                StreamReader sr = new StreamReader(gz);
+
+                // To ignore the first line(categories)
+                sr.ReadLine();
+
+                // Loop through all the lines and store it in the ratings list
+                while ((line = sr.ReadLine()) != null)
                 {
-                    tempArray = line.Split('\t');
-                    ratings.Add(new Rating(tempArray));
+                    if (line != lastLine)
+                    {
+                        tempArray = line.Split('\t');
+                        ratings.Add(new Rating(tempArray));
+                    }
+                    lastLine = line;
                 }
-                lastLine = line;
+                // Close the stream reader
+                sr.Close();
             }
-            // Close the stream reader
-            sr.Close();
-        }
-
-        public void LoadEpisode()
-        {
-            // Local variables
-            string line;
-            string[] tempArray;
-            string lastLine = null;
-
-            // Process of descompress and being able to read the file
-            FileStream fs = new FileStream(fileTitleEpisodesPath, FileMode.Open, FileAccess.Read);
-            GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
-            StreamReader sr = new StreamReader(gz);
-
-            // To ignore the first line(categories)
-            sr.ReadLine();
-
-            // Loop through all the lines and store it in the titles list
-            while ((line = sr.ReadLine()) != null)
+            // Load the file title.episode
+            if (fileType == "episodes")
             {
-                line += "\t0";
-                if (line != lastLine)
+                FileStream fs = new FileStream(fileTitleEpisodesPath, FileMode.Open, FileAccess.Read);
+                GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
+                StreamReader sr = new StreamReader(gz);
+
+                // To ignore the first line(categories)
+                sr.ReadLine();
+
+                // Loop through all the lines and store it in the titles list
+                while ((line = sr.ReadLine()) != null)
                 {
-                    tempArray = line.Split('\t');
-                    episodes.Add(new Episode(tempArray));
+                    line += "\t0";
+                    if (line != lastLine)
+                    {
+                        tempArray = line.Split('\t');
+                        episodes.Add(new Episode(tempArray));
+                    }
+                    lastLine = line;
                 }
-                lastLine = line;
+
+                // Close the stream reader
+                sr.Close();
             }
-            // Close the stream reader
-            sr.Close();
+            // Load the file name.basics
+            if (fileType == "names")
+            {
+                FileStream fs = new FileStream(fileNameBasicsPath, FileMode.Open, FileAccess.Read);
+                GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
+                StreamReader sr = new StreamReader(gz);
+
+                // To ignore the first line(categories)
+                sr.ReadLine();
+
+                // Loop through all the lines and store it in the titles list
+                while ((line = sr.ReadLine()) != null)
+                {
+                    line += "\t0";
+                    if (line != lastLine)
+                    {
+                        tempArray = line.Split('\t');
+                        people.Add(new Person(tempArray));
+                    }
+                    lastLine = line;
+                }
+
+                // Close the stream reader
+                sr.Close();
+            }
         }
 
         public void ProcessTitle(string name)

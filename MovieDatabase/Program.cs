@@ -68,7 +68,7 @@ namespace MovieDatabase
 
         public void ShowTitles(string response, Query q)
         {
-            q.ProcessTitle(response);
+            q.ProcessListOfResults(response, true);
 
             foreach (Title field in q.FilteredTitles)
             {
@@ -99,7 +99,7 @@ namespace MovieDatabase
             Console.WriteLine("Please check the details:\n");
 
             // Call function for the details of the selected title
-            q.ProcessDetails(ID);
+            q.ProcessDetails(ID, true);
 
             foreach (Details field in q.FilteredDetails)
             {

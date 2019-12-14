@@ -30,13 +30,14 @@ namespace MovieDatabase
         public IEnumerable<Title> FilteredTitles { get; private set; }
         public IEnumerable<Details> FilteredDetails { get; private set; }
         public IEnumerable<Details> FilteredParent { get; private set; }
-        public IEnumerable<Details> FilteredEpisodes { get; private set; }
+        public IEnumerable<Title> FilteredEpisodes { get; private set; }
         public IEnumerable<Person> FilteredNameDetails { get; private set; }
         public IEnumerable<Person> FilteredNames { get; private set; }
         public IEnumerable<Title> FilteredTitlesWithPerson { get; private set; }
         public IEnumerable<Person> FilteredPeopleInTitle { get; private set; }
 
         public string CurrentTitleID { get; set; }
+        public string CurrentTitleName { get; set; }
 
         public Query()
         {
@@ -60,7 +61,7 @@ namespace MovieDatabase
 
             FilteredTitles = new List<Title>();
             FilteredDetails = new List<Details>(); 
-            FilteredEpisodes = new List<Details>();
+            FilteredEpisodes = new List<Title>();
         }
 
         public void LoadFiles(string fileType)
@@ -173,6 +174,22 @@ namespace MovieDatabase
             }
         }
 
+        public void ReleaseFiles(string fileType = "")
+        {
+            if (fileType == "titles" || fileType == "")
+                titles.Clear();
+            if (fileType == "ratings" || fileType == "")
+                ratings.Clear();
+            if (fileType == "episodes" || fileType == "")
+                episodes.Clear();
+            if (fileType == "names" || fileType == "")
+                people.Clear();
+
+            GC.Collect();
+        }
+
+        // --------------------------------------------------
+
         public void ProcessListOfResults(string name, bool isTitle)
         {
             // Local variable
@@ -272,7 +289,7 @@ namespace MovieDatabase
                 });
         }
 
-        public void ProcessEpisode()
+        public void ProcessEpisodes()
         {
             short ID = 0;
             // Search and store into an IEnumerable the details of the episodes
@@ -284,15 +301,13 @@ namespace MovieDatabase
 
                  from l in gj.DefaultIfEmpty()
 
-                 select new Details
+                 select new Title
                  (new string[]
                  {
                     t.Tconst, t.TitleType, t.PrimaryTitle, t.OriginalTitle,
                     t.IsAdult.ToString(), t.StartYear.ToString(),
                     t.EndYear.ToString(), t.RuntimeMinutes.ToString(),
-                    t.Genres, l?.AverageRating.ToString() ?? noRating,
-                    l?.NumVotes.ToString() ?? noRating, e.SeasonNumber, e.EpisodeNumber,
-                    "", (ID++).ToString()
+                    t.Genres, (ID++).ToString()
                  })).ToList();
         }
 

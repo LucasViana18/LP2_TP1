@@ -17,7 +17,7 @@ namespace MovieDatabase
         public string RuntimeMinutes { get; set; }
         public string Genres { get; set; }
         public string AverageRating { get; set; }
-        public string numVotes { get; set; }
+        public string NumVotes { get; set; }
         public string SeasonNumber { get; private set; }
         public string EpisodeNumber { get; private set; }
         public string ParentTitle { get; private set; }
@@ -37,7 +37,7 @@ namespace MovieDatabase
             RuntimeMinutes = array[7];
             Genres = array[8];
             AverageRating = array[9];
-            numVotes = array[10];
+            NumVotes = array[10];
             SeasonNumber = array[11];
             EpisodeNumber = array[12];
             ParentTitle = array[13];

@@ -26,10 +26,18 @@ namespace MovieDatabase
         private List<Title> titles;
         private List<Rating> ratings;
         private List<Episode> episodes;
+        private List<Person> people;
         public IEnumerable<Title> FilteredTitles { get; private set; }
         public IEnumerable<Details> FilteredDetails { get; private set; }
         public IEnumerable<Details> FilteredParent { get; private set; }
-        public IEnumerable<Details> FilteredEpisodes { get; private set; }
+        public IEnumerable<Title> FilteredEpisodes { get; private set; }
+        public IEnumerable<Person> FilteredNameDetails { get; private set; }
+        public IEnumerable<Person> FilteredNames { get; private set; }
+        public IEnumerable<Title> FilteredTitlesWithPerson { get; private set; }
+        public IEnumerable<Person> FilteredPeopleInTitle { get; private set; }
+
+        public string CurrentTitleID { get; set; }
+        public string CurrentTitleName { get; set; }
 
         public Query()
         {
@@ -49,115 +57,167 @@ namespace MovieDatabase
             titles = new List<Title>();
             ratings = new List<Rating>();
             episodes = new List<Episode>();
+            people = new List<Person>();
+
             FilteredTitles = new List<Title>();
             FilteredDetails = new List<Details>(); 
-            FilteredEpisodes = new List<Details>();
+            FilteredEpisodes = new List<Title>();
         }
 
-        public void LoadTitle()
+        public void LoadFiles(string fileType)
         {
             // Local variables
             string line;
             string[] tempArray;
             string lastLine = null;
 
-            // Process of descompress and being able to read the file
-            FileStream fs = new FileStream(fileTitleBasicsPath, FileMode.Open, FileAccess.Read);
-            GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
-            StreamReader sr = new StreamReader(gz);
-
-            // To ignore the first line(categories)
-            sr.ReadLine();
-
-            // Loop through all the lines and store it in the titles list
-            while ((line = sr.ReadLine()) != null)
+            Console.Clear();
+            Console.WriteLine("Reading the " + fileType + " database. Please wait...");
+            // Load the file title.basics
+            if (fileType == "titles")
             {
-                line += "\t0";
-                if (line != lastLine)
+                // Process of descompress and being able to read the file
+                FileStream fs = new FileStream(fileTitleBasicsPath, FileMode.Open, FileAccess.Read);
+                GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
+                StreamReader sr = new StreamReader(gz);
+
+                // To ignore the first line(categories)
+                sr.ReadLine();
+
+                // Loop through all the lines and store it in the titles list
+                while ((line = sr.ReadLine()) != null)
                 {
-                    tempArray = line.Split('\t');
-                    titles.Add(new Title(tempArray));
+                    line += "\t0";
+                    if (line != lastLine)
+                    {
+                        tempArray = line.Split('\t');
+                        titles.Add(new Title(tempArray));
+                    }
+                    lastLine = line;
                 }
-                lastLine = line;
+                // Close the stream reader
+                sr.Close();
             }
-            // Close the stream reader
-            sr.Close();
+            // Load the file title.ratings
+            if (fileType == "ratings")
+            {
+                // Process of descompress and being able to read the file
+                FileStream fs = new FileStream(fileTitleRatingsPath, FileMode.Open, FileAccess.Read);
+                GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
+                StreamReader sr = new StreamReader(gz);
+
+                // To ignore the first line(categories)
+                sr.ReadLine();
+
+                // Loop through all the lines and store it in the ratings list
+                while ((line = sr.ReadLine()) != null)
+                {
+                    if (line != lastLine)
+                    {
+                        tempArray = line.Split('\t');
+                        ratings.Add(new Rating(tempArray));
+                    }
+                    lastLine = line;
+                }
+                // Close the stream reader
+                sr.Close();
+            }
+            // Load the file title.episode
+            if (fileType == "episodes")
+            {
+                FileStream fs = new FileStream(fileTitleEpisodesPath, FileMode.Open, FileAccess.Read);
+                GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
+                StreamReader sr = new StreamReader(gz);
+
+                // To ignore the first line(categories)
+                sr.ReadLine();
+
+                // Loop through all the lines and store it in the titles list
+                while ((line = sr.ReadLine()) != null)
+                {
+                    line += "\t0";
+                    if (line != lastLine)
+                    {
+                        tempArray = line.Split('\t');
+                        episodes.Add(new Episode(tempArray));
+                    }
+                    lastLine = line;
+                }
+
+                // Close the stream reader
+                sr.Close();
+            }
+            // Load the file name.basics
+            if (fileType == "names")
+            {
+                FileStream fs = new FileStream(fileNameBasicsPath, FileMode.Open, FileAccess.Read);
+                GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
+                StreamReader sr = new StreamReader(gz);
+
+                // To ignore the first line(categories)
+                sr.ReadLine();
+
+                // Loop through all the lines and store it in the titles list
+                while ((line = sr.ReadLine()) != null)
+                {
+                    line += "\t0";
+                    if (line != lastLine)
+                    {
+                        tempArray = line.Split('\t');
+                        people.Add(new Person(tempArray));
+                    }
+                    lastLine = line;
+                }
+
+                // Close the stream reader
+                sr.Close();
+            }
         }
 
-        public void LoadRating()
+        public void ReleaseFiles(string fileType = "")
         {
-            // Local variables
-            string line;
-            string[] tempArray;
-            string lastLine = null;
+            if (fileType == "titles" || fileType == "")
+                titles.Clear();
+            if (fileType == "ratings" || fileType == "")
+                ratings.Clear();
+            if (fileType == "episodes" || fileType == "")
+                episodes.Clear();
+            if (fileType == "names" || fileType == "")
+                people.Clear();
 
-            // Process of descompress and being able to read the file
-            FileStream fs = new FileStream(fileTitleRatingsPath, FileMode.Open, FileAccess.Read);
-            GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
-            StreamReader sr = new StreamReader(gz);
-
-            // To ignore the first line(categories)
-            sr.ReadLine();
-
-            // Loop through all the lines and store it in the titles list
-            while ((line = sr.ReadLine()) != null)
-            {
-                line += "\t0";
-                if (line != lastLine)
-                {
-                    tempArray = line.Split('\t');
-                    ratings.Add(new Rating(tempArray));
-                }
-                lastLine = line;
-            }
-            // Close the stream reader
-            sr.Close();
+            GC.Collect();
         }
 
-        public void LoadEpisode()
+        // --------------------------------------------------
+
+        public void ProcessListOfResults(string name, bool isTitle)
         {
-            // Local variables
-            string line;
-            string[] tempArray;
-            string lastLine = null;
-
-            // Process of descompress and being able to read the file
-            FileStream fs = new FileStream(fileTitleEpisodesPath, FileMode.Open, FileAccess.Read);
-            GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
-            StreamReader sr = new StreamReader(gz);
-
-            // To ignore the first line(categories)
-            sr.ReadLine();
-
-            // Loop through all the lines and store it in the titles list
-            while ((line = sr.ReadLine()) != null)
-            {
-                line += "\t0";
-                if (line != lastLine)
-                {
-                    tempArray = line.Split('\t');
-                    episodes.Add(new Episode(tempArray));
-                }
-                lastLine = line;
-            }
-            // Close the stream reader
-            sr.Close();
-        }
-
-        public void ProcessTitle(string name)
-        {
+            // Local variable
             int ID = 0;
-            // Select the titles with the certain word typed by the user
-            FilteredTitles =
-                (from x in titles
+            if (isTitle)
+            {
+                // Select the titles with the certain word typed by the user
+                FilteredTitles =
+                    (from x in titles
 
-                 where x.PrimaryTitle.ToLower().Contains(name)
+                     where x.PrimaryTitle.ToLower().Contains(name)
 
-                 select new Title(new string[]
+                     select new Title(new string[]
                      {x.Tconst, x.TitleType, x.PrimaryTitle, x.OriginalTitle,
                     x.IsAdult.ToString(), x.StartYear.ToString(),
                     x.EndYear.ToString(), x.RuntimeMinutes.ToString(),
                     x.Genres, (ID++).ToString()})).ToList();
+            }
+            else
+            {
+                FilteredNames =
+                    (from y in people
+                     where y.PrimaryName.ToLower().Contains(name)
+                     select new Person(new string[]
+                     {y.Nconst, y.PrimaryName, y.BirthYear, y.DeathYear,
+                     y.PrimaryProfession, y.KnownForTitles,
+                     (ID++).ToString()})).ToList();
+            }
         }
 
         private string GetParentTitle(string episodeParentID)
@@ -172,12 +232,16 @@ namespace MovieDatabase
             }
         }
 
-        public void ProcessDetails(string selectedID)
+        public void ProcessDetails(string selectedID, bool isTitle)
         {
-            FilteredDetails =
+            if (isTitle)
+            {
+                // Select the details, including ratings, of the title, by ID, that the user typed
+                FilteredDetails =
                     (from f in FilteredTitles
                      join r in ratings on f.Tconst equals r.Tconst into outerRating
                      join e in episodes on f.Tconst equals e.Tconst into outerEpisodes
+
                      from oR in outerRating.DefaultIfEmpty()
                      from oE in outerEpisodes.DefaultIfEmpty()
 
@@ -190,7 +254,18 @@ namespace MovieDatabase
                     f.EndYear.ToString(), f.RuntimeMinutes.ToString(),
                     f.Genres, oR?.AverageRating.ToString() ?? noRating,
                     oR?.NumVotes.ToString() ?? noRating, oE?.SeasonNumber ?? "",
-                    oE?.EpisodeNumber ?? "", GetParentTitle(oE?.ParentTconst ?? ""), "" })).ToList();
+                    oE?.EpisodeNumber ?? "", GetParentTitle(oE?.ParentTconst ?? ""), ""
+                     })).ToList();
+            }
+            else
+            {
+                FilteredNameDetails =
+                    (from f in FilteredNames
+                     where f.ID == selectedID
+                     select new Person(new string[]
+                     {f.Nconst, f.PrimaryName, f.BirthYear, f.DeathYear, f.PrimaryProfession,
+                    f.KnownForTitles,""})).ToList();
+            }
         }
 
         public void ProcessParent()
@@ -214,7 +289,7 @@ namespace MovieDatabase
                 });
         }
 
-        public void ProcessEpisode()
+        public void ProcessEpisodes()
         {
             short ID = 0;
             // Search and store into an IEnumerable the details of the episodes
@@ -226,16 +301,47 @@ namespace MovieDatabase
 
                  from l in gj.DefaultIfEmpty()
 
-                 select new Details
+                 select new Title
                  (new string[]
                  {
                     t.Tconst, t.TitleType, t.PrimaryTitle, t.OriginalTitle,
                     t.IsAdult.ToString(), t.StartYear.ToString(),
                     t.EndYear.ToString(), t.RuntimeMinutes.ToString(),
-                    t.Genres, l?.AverageRating.ToString() ?? noRating,
-                    l?.NumVotes.ToString() ?? noRating, e.SeasonNumber, e.EpisodeNumber,
-                    "", (ID++).ToString()
+                    t.Genres, (ID++).ToString()
                  })).ToList();
+        }
+
+        public void ProcessTitlesWithPerson()
+        {
+            short ID = 0;
+
+            FilteredTitlesWithPerson =
+                (from f in FilteredNameDetails
+                 from t in titles
+
+                 where f.KnownForTitles.Split(',').Any(x => x.Contains(t.Tconst))
+
+                 select new Title(new string[]
+                 {t.Tconst, t.TitleType, t.PrimaryTitle, t.OriginalTitle,
+                t.IsAdult.ToString(), t.StartYear.ToString(),
+                t.EndYear.ToString(), t.RuntimeMinutes.ToString(),
+                t.Genres, (ID++).ToString()})).ToList();
+
+        }
+
+        public void ProcessPeopleInTitle()
+        {
+            short ID = 0;
+
+            FilteredPeopleInTitle =
+                from p in people
+
+                where p.KnownForTitles.Split(',').Any(x => x.Contains(CurrentTitleID))
+
+                select new Person(new string[]
+                {p.Nconst, p.PrimaryName, p.BirthYear, p.DeathYear,
+                p.PrimaryProfession, p.KnownForTitles,
+                (ID++).ToString()});
         }
     }
 }

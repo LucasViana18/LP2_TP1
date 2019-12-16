@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MovieDatabase
+﻿namespace MovieDatabase
 {
     public class Details
     {

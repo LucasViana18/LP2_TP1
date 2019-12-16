@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-
-namespace MovieDatabase
+﻿namespace MovieDatabase
 {
     class Program
     {

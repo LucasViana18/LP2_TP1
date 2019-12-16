@@ -17,6 +17,7 @@ namespace MovieDatabase
 
         private const string noRating = "There is no rating for this title.";
 
+        private string fileToImport;
         private string folderPath;
         private string fileTitleBasicsPath;
         private string fileTitleRatingsPath;
@@ -27,17 +28,17 @@ namespace MovieDatabase
         private List<Rating> ratings;
         private List<Episode> episodes;
         private List<Person> people;
+
         public IEnumerable<Title> FilteredTitles { get; private set; }
-        public IEnumerable<Details> FilteredDetails { get; private set; }
-        public IEnumerable<Details> FilteredParent { get; private set; }
-        public IEnumerable<Title> FilteredEpisodes { get; private set; }
+        public IEnumerable<Details> FilteredDetails { get; set; }
         public IEnumerable<Person> FilteredNameDetails { get; private set; }
         public IEnumerable<Person> FilteredNames { get; private set; }
-        public IEnumerable<Title> FilteredTitlesWithPerson { get; private set; }
-        public IEnumerable<Person> FilteredPeopleInTitle { get; private set; }
 
         public string CurrentTitleID { get; set; }
         public string CurrentTitleName { get; set; }
+        public string CurrentPersonID { get; set; }
+        public string CurrentPersonName { get; set; }
+        public string CurrentTitlesforPerson { get; set; }
 
         public Query()
         {
@@ -60,165 +61,233 @@ namespace MovieDatabase
             people = new List<Person>();
 
             FilteredTitles = new List<Title>();
-            FilteredDetails = new List<Details>(); 
-            FilteredEpisodes = new List<Title>();
+            FilteredDetails = new List<Details>();
+            FilteredNames = new List<Person>();
+            FilteredNameDetails = new List<Person>();
         }
 
-        public void LoadFiles(string fileType)
+        // --------------------------------------------------------------------
+
+        // Method to import files from compacted files
+        public void LoadFiles(DbType fileType, UserInterface userInt)
         {
             // Local variables
             string line;
             string[] tempArray;
             string lastLine = null;
+            string fileName = "";
 
-            Console.Clear();
-            Console.WriteLine("Reading the " + fileType + " database. Please wait...");
-            // Load the file title.basics
-            if (fileType == "titles")
+            bool addColumn = true;
+            int processed = 0;
+            int imported = 0;
+
+            // Configure the work variables
+            switch (fileType)
             {
-                // Process of descompress and being able to read the file
-                FileStream fs = new FileStream(fileTitleBasicsPath, FileMode.Open, FileAccess.Read);
-                GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
-                StreamReader sr = new StreamReader(gz);
-
-                // To ignore the first line(categories)
-                sr.ReadLine();
-
-                // Loop through all the lines and store it in the titles list
-                while ((line = sr.ReadLine()) != null)
-                {
-                    line += "\t0";
-                    if (line != lastLine)
+                case DbType.dtTitles:
                     {
-                        tempArray = line.Split('\t');
-                        titles.Add(new Title(tempArray));
+                        fileToImport = fileTitleBasicsPath;
+                        fileName = "Titles";
+                        break;
                     }
-                    lastLine = line;
-                }
-                // Close the stream reader
-                sr.Close();
+                case DbType.dtRatings:
+                    {
+                        fileToImport = fileTitleRatingsPath;
+                        fileName = "Ratings";
+                        addColumn = false;
+                        break;
+                    }
+                case DbType.dtEpisodes:
+                    {
+                        fileToImport = fileTitleEpisodesPath;
+                        fileName = "Episodes";
+                        break;
+                    }
+                case DbType.dtPersons:
+                    {
+                        fileToImport = fileNameBasicsPath;
+                        fileName = "Persons";
+                        break;
+                    }
             }
-            // Load the file title.ratings
-            if (fileType == "ratings")
+
+            userInt.ShowLoading("Decompressing database file. Please wait.");
+
+            // Process of descompress and being able to read the file
+            FileStream fs = new FileStream(fileToImport, FileMode.Open, FileAccess.Read);
+            GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
+            StreamReader sr = new StreamReader(gz);
+
+            // To ignore the first line(categories)
+            sr.ReadLine();
+
+            // Loop through all the lines and store it in the titles list
+            while ((line = sr.ReadLine()) != null)
             {
-                // Process of descompress and being able to read the file
-                FileStream fs = new FileStream(fileTitleRatingsPath, FileMode.Open, FileAccess.Read);
-                GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
-                StreamReader sr = new StreamReader(gz);
-
-                // To ignore the first line(categories)
-                sr.ReadLine();
-
-                // Loop through all the lines and store it in the ratings list
-                while ((line = sr.ReadLine()) != null)
+                processed++;
+                if (line != lastLine)
                 {
-                    if (line != lastLine)
-                    {
-                        tempArray = line.Split('\t');
-                        ratings.Add(new Rating(tempArray));
-                    }
+                    imported++;
                     lastLine = line;
-                }
-                // Close the stream reader
-                sr.Close();
-            }
-            // Load the file title.episode
-            if (fileType == "episodes")
-            {
-                FileStream fs = new FileStream(fileTitleEpisodesPath, FileMode.Open, FileAccess.Read);
-                GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
-                StreamReader sr = new StreamReader(gz);
+                    if (addColumn)
+                        line += "\t0";
 
-                // To ignore the first line(categories)
-                sr.ReadLine();
-
-                // Loop through all the lines and store it in the titles list
-                while ((line = sr.ReadLine()) != null)
-                {
-                    line += "\t0";
-                    if (line != lastLine)
+                    tempArray = line.Split('\t');
+                    switch (fileType)
                     {
-                        tempArray = line.Split('\t');
-                        episodes.Add(new Episode(tempArray));
+                        case DbType.dtTitles:
+                            {
+                                titles.Add(new Title(tempArray));
+                                break;
+                            }
+                        case DbType.dtRatings:
+                            {
+                                ratings.Add(new Rating(tempArray));
+                                break;
+                            }
+                        case DbType.dtEpisodes:
+                            {
+                                episodes.Add(new Episode(tempArray));
+                                break;
+                            }
+                        case DbType.dtPersons:
+                            {
+                                people.Add(new Person(tempArray));
+                                break;
+                            }
                     }
-                    lastLine = line;
+
                 }
-
-                // Close the stream reader
-                sr.Close();
+                if ((processed % 85000) == 0)
+                    userInt.ShowLoading("Importing " + fileName + "...\nProcessed " + processed + " lines. Imported " + imported + " records.");
             }
-            // Load the file name.basics
-            if (fileType == "names")
-            {
-                FileStream fs = new FileStream(fileNameBasicsPath, FileMode.Open, FileAccess.Read);
-                GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
-                StreamReader sr = new StreamReader(gz);
-
-                // To ignore the first line(categories)
-                sr.ReadLine();
-
-                // Loop through all the lines and store it in the titles list
-                while ((line = sr.ReadLine()) != null)
-                {
-                    line += "\t0";
-                    if (line != lastLine)
-                    {
-                        tempArray = line.Split('\t');
-                        people.Add(new Person(tempArray));
-                    }
-                    lastLine = line;
-                }
-
-                // Close the stream reader
-                sr.Close();
-            }
+            // Close the stream reader
+            sr.Close();
         }
 
-        public void ReleaseFiles(string fileType = "")
+        public void ReleaseFiles(DbType whatFile = DbType.dtAll)
         {
-            if (fileType == "titles" || fileType == "")
+            if (whatFile == DbType.dtTitles || whatFile == DbType.dtAll)
                 titles.Clear();
-            if (fileType == "ratings" || fileType == "")
+            if (whatFile == DbType.dtRatings || whatFile == DbType.dtAll)
                 ratings.Clear();
-            if (fileType == "episodes" || fileType == "")
+            if (whatFile == DbType.dtEpisodes || whatFile == DbType.dtAll)
                 episodes.Clear();
-            if (fileType == "names" || fileType == "")
+            if (whatFile == DbType.dtPersons || whatFile == DbType.dtAll)
                 people.Clear();
 
             GC.Collect();
         }
 
-        // --------------------------------------------------
+        // --------------------------------------------------------------------
 
-        public void ProcessListOfResults(string name, bool isTitle)
+        // Search for Titles that contains a string
+        public void SearchForTitles(FilterType filterType, string toSearch)
         {
             // Local variable
             int ID = 0;
-            if (isTitle)
+            // Select the titles with the certain word typed by the user
+            switch (filterType)
             {
-                // Select the titles with the certain word typed by the user
-                FilteredTitles =
-                    (from x in titles
+                case FilterType.ftTitlesByName:
+                    {
+                        FilteredTitles =
+                            (from x in titles
 
-                     where x.PrimaryTitle.ToLower().Contains(name)
+                             where x.PrimaryTitle.ToLower().Contains(toSearch)
 
-                     select new Title(new string[]
-                     {x.Tconst, x.TitleType, x.PrimaryTitle, x.OriginalTitle,
-                    x.IsAdult.ToString(), x.StartYear.ToString(),
-                    x.EndYear.ToString(), x.RuntimeMinutes.ToString(),
-                    x.Genres, (ID++).ToString()})).ToList();
-            }
-            else
-            {
-                FilteredNames =
-                    (from y in people
-                     where y.PrimaryName.ToLower().Contains(name)
-                     select new Person(new string[]
-                     {y.Nconst, y.PrimaryName, y.BirthYear, y.DeathYear,
-                     y.PrimaryProfession, y.KnownForTitles,
-                     (ID++).ToString()})).ToList();
+                             select new Title(new string[]
+                             {x.Tconst, x.TitleType, x.PrimaryTitle, x.OriginalTitle,
+                              x.IsAdult.ToString(), x.StartYear.ToString(),
+                              x.EndYear.ToString(), x.RuntimeMinutes.ToString(),
+                              x.Genres, (ID++).ToString()})).ToList();
+                        break;
+                    }
+                case FilterType.ftSerieForEpisode:
+                    {
+                        // Search and store into an IEnumerable the details of the parent
+                        FilteredTitles =
+                            (from x in titles
+                             join e in episodes on x.Tconst equals e.ParentTconst
+
+                             where (e.Tconst == toSearch)
+
+                             select new Title
+                             (new string[]
+                              {x.Tconst, x.TitleType, x.PrimaryTitle, x.OriginalTitle,
+                              x.IsAdult.ToString(), x.StartYear.ToString(),
+                              x.EndYear.ToString(), x.RuntimeMinutes.ToString(),
+                              x.Genres, (ID++).ToString()})).ToList();
+
+                        break;
+                    }
+                case FilterType.ftEpisodesForSerie:
+                    {
+                        FilteredTitles =
+                            (from e in episodes
+                             join x in titles on e.Tconst equals x.Tconst
+
+                             where (e.ParentTconst == toSearch)
+
+                             select new Title
+                             (new string[]
+                             {x.Tconst, x.TitleType, x.PrimaryTitle, x.OriginalTitle,
+                              x.IsAdult.ToString(), x.StartYear.ToString(),
+                              x.EndYear.ToString(), x.RuntimeMinutes.ToString(),
+                              x.Genres, (ID++).ToString()})).ToList();
+                        break;
+                    }
+                case FilterType.ftTitlesByPerson:
+                    {
+                        FilteredTitles =
+                            (from x in titles
+
+                             where toSearch.Split(',').Any(y => y.Contains(x.Tconst))
+
+                             select new Title
+                             (new string[]
+                             {x.Tconst, x.TitleType, x.PrimaryTitle, x.OriginalTitle,
+                              x.IsAdult.ToString(), x.StartYear.ToString(),
+                              x.EndYear.ToString(), x.RuntimeMinutes.ToString(),
+                              x.Genres, (ID++).ToString()})).ToList();
+                        break;
+                    }
             }
         }
+
+        public void SearchForPersons(FilterType filterType, string toSearch)
+        {
+            // Local variable
+            int ID = 0;
+
+            switch (filterType)
+            {
+                case FilterType.ftPersonsByName:
+                    {
+                        FilteredNames =
+                            (from p in people
+                             where p.PrimaryName.ToLower().Contains(toSearch)
+                             select new Person(new string[]
+                             {p.Nconst, p.PrimaryName, p.BirthYear, p.DeathYear,
+                              p.PrimaryProfession, p.KnownForTitles,
+                              (ID++).ToString()})).ToList();
+                        break;
+                    }
+                case FilterType.ftPersonsByTitle:
+                    {
+                        FilteredNames =
+                            (from p in people
+                             where p.KnownForTitles.Split(',').Any(x => x.Contains(toSearch))
+                             select new Person(new string[]
+                             {p.Nconst, p.PrimaryName, p.BirthYear, p.DeathYear,
+                              p.PrimaryProfession, p.KnownForTitles,
+                              (ID++).ToString()})).ToList();
+                        break;
+                    }
+            }
+        }
+
+        // Methods that filter the results
 
         private string GetParentTitle(string episodeParentID)
         {
@@ -231,10 +300,9 @@ namespace MovieDatabase
                 return "";
             }
         }
-
-        public void ProcessDetails(string selectedID, bool isTitle)
+        public void ProcessDetails(string selectedID, DbType database)
         {
-            if (isTitle)
+            if (database == DbType.dtTitles)
             {
                 // Select the details, including ratings, of the title, by ID, that the user typed
                 FilteredDetails =
@@ -249,15 +317,22 @@ namespace MovieDatabase
 
                      select new Details
                      (new string[]
-                     {   f.Tconst, f.TitleType, f.PrimaryTitle, f.OriginalTitle,
-                    f.IsAdult.ToString(), f.StartYear.ToString(),
-                    f.EndYear.ToString(), f.RuntimeMinutes.ToString(),
-                    f.Genres, oR?.AverageRating.ToString() ?? noRating,
-                    oR?.NumVotes.ToString() ?? noRating, oE?.SeasonNumber ?? "",
-                    oE?.EpisodeNumber ?? "", GetParentTitle(oE?.ParentTconst ?? ""), ""
+                     {  f.Tconst, f.TitleType, f.PrimaryTitle, f.OriginalTitle,
+                        f.IsAdult.ToString(), f.StartYear.ToString(),
+                        f.EndYear.ToString(), f.RuntimeMinutes.ToString(),
+                        f.Genres, oR?.AverageRating.ToString() ?? noRating,
+                        oR?.NumVotes.ToString() ?? noRating, oE?.SeasonNumber ?? "",
+                        oE?.EpisodeNumber ?? "", GetParentTitle(oE?.ParentTconst ?? ""), ""
                      })).ToList();
+
+                // Set up the current title code and nome
+                foreach (Details field in FilteredDetails)
+                {
+                    CurrentTitleID = field.Tconst;
+                    CurrentTitleName = field.PrimaryTitle;
+                }
             }
-            else
+            else if (database == DbType.dtPersons)
             {
                 FilteredNameDetails =
                     (from f in FilteredNames
@@ -265,83 +340,15 @@ namespace MovieDatabase
                      select new Person(new string[]
                      {f.Nconst, f.PrimaryName, f.BirthYear, f.DeathYear, f.PrimaryProfession,
                     f.KnownForTitles,""})).ToList();
+
+                // Set up the current person code and nome
+                foreach (Person field in FilteredNameDetails)
+                {
+                    CurrentPersonID = field.Nconst;
+                    CurrentPersonName = field.PrimaryName;
+                    CurrentTitlesforPerson = field.KnownForTitles;
+                }
             }
-        }
-
-        public void ProcessParent()
-        {
-            FilteredParent =
-                from d in FilteredDetails
-                join e in episodes on d.Tconst equals e.Tconst
-                join t in titles on e.ParentTconst equals t.Tconst
-                join r in ratings on t.Tconst equals r.Tconst into gj
-
-                from l in gj.DefaultIfEmpty()
-
-                select new Details
-                (new string[]
-                {   t.Tconst, t.TitleType, t.PrimaryTitle, t.OriginalTitle,
-                    t.IsAdult.ToString(), t.StartYear.ToString(),
-                    t.EndYear.ToString(), t.RuntimeMinutes.ToString(),
-                    t.Genres, l?.AverageRating.ToString() ?? noRating,
-                    l?.NumVotes.ToString() ?? noRating, e.SeasonNumber, e.EpisodeNumber,
-                    "", ""
-                });
-        }
-
-        public void ProcessEpisodes()
-        {
-            short ID = 0;
-            // Search and store into an IEnumerable the details of the episodes
-            FilteredEpisodes =
-                (from d in FilteredDetails
-                 join e in episodes on d.Tconst equals e.ParentTconst
-                 join t in titles on e.Tconst equals t.Tconst
-                 join r in ratings on t.Tconst equals r.Tconst into gj
-
-                 from l in gj.DefaultIfEmpty()
-
-                 select new Title
-                 (new string[]
-                 {
-                    t.Tconst, t.TitleType, t.PrimaryTitle, t.OriginalTitle,
-                    t.IsAdult.ToString(), t.StartYear.ToString(),
-                    t.EndYear.ToString(), t.RuntimeMinutes.ToString(),
-                    t.Genres, (ID++).ToString()
-                 })).ToList();
-        }
-
-        public void ProcessTitlesWithPerson()
-        {
-            short ID = 0;
-
-            FilteredTitlesWithPerson =
-                (from f in FilteredNameDetails
-                 from t in titles
-
-                 where f.KnownForTitles.Split(',').Any(x => x.Contains(t.Tconst))
-
-                 select new Title(new string[]
-                 {t.Tconst, t.TitleType, t.PrimaryTitle, t.OriginalTitle,
-                t.IsAdult.ToString(), t.StartYear.ToString(),
-                t.EndYear.ToString(), t.RuntimeMinutes.ToString(),
-                t.Genres, (ID++).ToString()})).ToList();
-
-        }
-
-        public void ProcessPeopleInTitle()
-        {
-            short ID = 0;
-
-            FilteredPeopleInTitle =
-                from p in people
-
-                where p.KnownForTitles.Split(',').Any(x => x.Contains(CurrentTitleID))
-
-                select new Person(new string[]
-                {p.Nconst, p.PrimaryName, p.BirthYear, p.DeathYear,
-                p.PrimaryProfession, p.KnownForTitles,
-                (ID++).ToString()});
         }
     }
 }

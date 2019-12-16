@@ -6,464 +6,422 @@ namespace MovieDatabase
 {
     public class UserInterface
     {
-        private Query q;
+        private string sectionHeader;
 
-        public void StartMenu()
+        // Interface Properties
+        public string ProgramName { get; set; }
+        public string ProgramHeader1 { get; set; }
+        public string ProgramHeader2 { get; set; }
+
+        public UserInterface()
         {
-            // Local variables
-            char response;
-            do
-            {
-                Console.Clear();
-
-                // Ask the user for the search of titles or persons
-                Console.Write("Selecione uma opção: \n 1 - Títulos\n " +
-                    "2 - Pessoas\n 3 - Sair\n --> ");
-                response = Console.ReadLine()[0];
-
-                q = new Query();
-
-                // Option choosing
-                switch (response)
-                {
-                    case '1':
-                        SearchFor('T');
-                        break;
-                    case '2':
-                        SearchFor('P');
-                        break;
-                    case '3':
-                        Environment.Exit(0);
-                        break;
-                    default:
-                        Console.WriteLine("Digite uma das opções disponíveis");
-                        break;
-                }
-                q = null;
-                GC.Collect();
-            } while (response != '3');
+            ProgramName = "IMDB Movie Database";
+            sectionHeader = "Main Menu";
+            ProgramHeader1 = "This program provide you further information on thousands of movies.";
+            ProgramHeader2 = "Data souce: Public database available on IMDb website (https://www.imdb.com/interfaces/)";
         }
 
-        private void SearchFor(char searchType)
+        public void Header()
         {
+            string localHeader = ProgramName + " - " + sectionHeader;
             Console.Clear();
-            // Local variables
-            string option;
+            Console.WriteLine(localHeader);
+            Console.WriteLine(RepeatChar('=', localHeader.Length));
+            Console.WriteLine(ProgramHeader1);
+            Console.WriteLine(ProgramHeader2);
+            Console.WriteLine(RepeatChar('-', 60));
+        }
 
-            // Ask the user for the title search
-            if (searchType == 'T')
+        public void Waiting()
+        {
+            Header();
+            Console.WriteLine("Please wait...");
+        }
+        private string RepeatChar(char character, int number)
+        {
+            string result = "";
+            for (int i = 0; i < number; i++)
+                result += character;
+            return result;
+        }
+
+        // For input the user options
+        private string GetUserChoice(string validLetters = "", bool allowNumbers = false, Int16 minNumber = 0, Int16 maxNumber = 999)
+        {
+            ConsoleKeyInfo response;
+            string result = "";
+            do
             {
-                q.LoadFiles("titles");
-                Console.Clear();
-                Console.Write("Pesquise o título ou digite 'v' para voltar.\n -->");
-
-            }
-            else
-            {
-                q.LoadFiles("names");
-                Console.Clear();
-                Console.Write("Pesquise o nome da pessoa ou digite 'v' para voltar.\n -->");
-            }
-
-            option = Console.ReadLine();
-
-            if (option.ToLower() != "v")
-            {
-                if (searchType == 'T')
-                    // Call method for the list of title results
-                    ShowListOfResults(option, true);
+                response = Console.ReadKey(true);
+                if (Char.IsLetterOrDigit(response.KeyChar))
+                {
+                    if (Char.IsDigit(response.KeyChar) && allowNumbers)
+                    {
+                        if (Int16.TryParse(result + response.KeyChar, out Int16 numberResponse))
+                        {
+                            if ((numberResponse >= minNumber || numberResponse.ToString().Length < minNumber.ToString().Length)
+                                && numberResponse <= maxNumber)
+                            {
+                                result += response.KeyChar;
+                                Console.Write(response.KeyChar);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (validLetters == "" || validLetters.ToLower().Contains(Char.ToLower(response.KeyChar)))
+                        {
+                            result += Char.ToLower(response.KeyChar);
+                            Console.Write(response.KeyChar);
+                            break;
+                        }
+                    }
+                }
                 else
-                    // Call method for the list of name results
-                    ShowListOfResults(option, false);
-            }
+                {
+                    if (response.Key == ConsoleKey.Backspace)
+                    {
+                        if (result.Length > 0)
+                        {
+                            result = result.Substring(0, result.Length - 1);
+                            Console.Write("\b \b");
+                        }
+                    }
+                    else if (response.Key == ConsoleKey.Enter && result != "")
+                    {
+                        Console.Write(response.KeyChar);
+                        break;
+                    }
+                }
+
+            } while (true);
+
+            return result;
         }
 
-        private void ShowListOfResults(string response, bool isTitle)
+        public string StartMenu()
         {
-            // Local variable
-            string option = "";
-            string userChoice;
-            byte i = 0;
+            // Draw Header
+            sectionHeader = "Main Menu";
+            Header();
 
+            // Ask the user for the search of titles or persons
+            Console.Write("Please choose your Search Criteria: \n 1 - Titles\n " +
+                    "2 - Persons/Crew\n 3 - Exit\n --> ");
+            return GetUserChoice("", true, 1, 3);
+        }
+
+        public void ShowLoading(string progressMessage)
+        {
+            sectionHeader = "Import File";
+            Header();
             Console.Clear();
-
-            if (isTitle) // Results for titles
-            {
-                // Call the function to filter the titles
-                q.ProcessListOfResults(response, true);
-
-                Console.WriteLine("--------------------------CATEGORIES----" +
-                    "----------------------------");
-                Console.WriteLine("ID | Type | Primary Title | For adults? | " +
-                        "Start Year | End Year | Minutes | Genre\n");
-
-                // Loop that goes through the list of titles that contains the word/s that the user typed
-                foreach (Title field in q.FilteredTitles)
-                {
-                    Console.WriteLine("-------------------------------------------------------");
-                    Console.WriteLine
-                        ("(" + field.ID + ") " + field.TitleType + " | " + field.PrimaryTitle + " | " + field.IsAdult + " | " +
-                        field.StartYear + " | " + field.EndYear + " | " + field.RuntimeMinutes + " | " +
-                        field.Genres + "  - " + field.Tconst + "\n");
-                    i++;
-                    if (i > 19)
-                    {
-                        option = AskForID(true);
-                        if (option != "c")
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            i = 0;
-                            option = "";
-                        }
-
-                    }
-                }
-                if (option == "")
-                {
-                    Console.WriteLine("-----------------------------END------------------------------------");
-
-                    option = AskForID(false);
-                }
-                if (option != "v")
-                {
-                    ShowDetails(option, true);
-                    userChoice = AskGeneric(true);
-                    switch (userChoice)
-                    {
-                        case "1":
-                            ShowParent();
-                            break;
-                        case "2":
-                            ShowChildren();
-                            break;
-                        case "3":
-                            ShowPeopleInTitle();
-                            break;
-                    }
-                }
-            }
-            else // Results for people
-            {
-                q.ProcessListOfResults(response, false);
-
-                Console.WriteLine("--------------------------CATEGORIES----" +
-                    "----------------------------");
-                Console.WriteLine("ID | Primary Name | Primary Professions | IMDB ID\n");
-
-                // Loop that goes through the list of titles that contains the word/s that the user typed
-                foreach (Person field in q.FilteredNames)
-                {
-
-                    Console.WriteLine("-------------------------------------------------------");
-                    Console.WriteLine
-                        ("(" + field.ID + ") " + field.PrimaryName + " - " + field.PrimaryProfession + " - " +
-                        field.Nconst + "\n");
-                    i++;
-                    if (i > 19)
-                    {
-                        option = AskForID(true);
-                        if (option != "c")
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            i = 0;
-                            option = "";
-                        }
-                    }
-                }
-                if (option == "")
-                {
-                    Console.WriteLine("-----------------------------END------------------------------------");
-
-                    option = AskForID(false);
-                }
-                if (option != "v")
-                {
-                    ShowDetails(option, false);
-                    userChoice = AskGeneric(false);
-                    if (userChoice == "1")
-                        ShowTitlesWithPerson();
-                }
-            }
+            Console.WriteLine(progressMessage);
         }
 
-        private string AskForID(bool nextPage)
+        public string SearchFor(string sectionTitle)
         {
-            // Local variables
             string option;
-            string extraOption;
-
-            // Ask user the title ID for further detail
-            if (nextPage)
-            {
-                Console.WriteLine("Selecione uma das opções acima ou [V] para voltar para menu principal ou [C] para Continuar.");
-                extraOption = "c";
-
-            }
-            else
-            {
-                Console.WriteLine("Selecione uma das opções acima ou [V] para voltar para menu principal.");
-                extraOption = "v";
-            }
+            sectionHeader = sectionTitle;
             do
             {
+                Header();
+                Console.WriteLine();
+                Console.WriteLine("     Please enter with the " + sectionTitle + " name for searching");
+                Console.WriteLine("or press ENTER to return. You can type only a part of the name:");
                 option = Console.ReadLine();
-                option = option.ToLower();
-            } while (option != "v" && option != extraOption && !int.TryParse(option, out int _));
-
-            return option;
-        }
-
-        private void ShowDetails(string ID, bool isTitle)
-        {
-            Console.Clear();
-            Console.WriteLine("Please check the details:\n");
-
-            if (isTitle)
-            {
-                q.LoadFiles("ratings");
-                q.LoadFiles("episodes");
-                // Call function for the details of the selected title
-                q.ProcessDetails(ID, true);
-
-                // Goes through the list of details of the selected title
-                foreach (Details field in q.FilteredDetails)
+                if (option == "")
                 {
-                    q.CurrentTitleID = field.Tconst;
-                    q.CurrentTitleName = field.PrimaryTitle;
-                    Console.WriteLine("Code: \t" + field.Tconst + "\n");
-                    Console.WriteLine("Name: \t" + field.PrimaryTitle + "\n");
-                    Console.WriteLine("Original Name: \t" + field.OriginalTitle + "\n");
-                    Console.WriteLine("Title Type: \t" + field.TitleType + "\n");
-                    Console.WriteLine("Genre: \t" + field.Genres + "\n");
-                    Console.WriteLine("Average Rating: \t" + field.AverageRating + "\n");
-                    Console.WriteLine("Number of Votes: \t" + field.NumVotes + "\n");
-                    Console.WriteLine("Start Year: \t" + field.StartYear + "\n");
-                    Console.WriteLine("End Year: \t" + field.EndYear + "\n");
-                    Console.WriteLine("Duration: \t" + field.RuntimeMinutes + "\n");
-                    Console.WriteLine("Adults Only: \t" + field.IsAdult + "\n");
-                    if (field.TitleType == "tvEpisode")
+                    Console.WriteLine("Do you confirm return to main menu? (Y/N):");
+                    if (GetUserChoice("YN") == "y")
                     {
-                        Console.WriteLine("From the series: \t" + field.ParentTitle + "\n");
-                        Console.WriteLine("Season: \t" + field.SeasonNumber + "\n");
-                        Console.WriteLine("Episode: \t" + field.EpisodeNumber + "\n");
+                        break;
                     }
+
                 }
-            }
-            else
-            {
-                // Call function for the details of the selected name
-                q.ProcessDetails(ID, false);
+                else
+                    break;
+            } while (true);
 
-                // Goes through the list of details of the selected name
-                foreach (Person field in q.FilteredNameDetails)
-                {
-                    Console.WriteLine("Code: \t" + field.Nconst + "\n");
-                    Console.WriteLine("Name: \t" + field.PrimaryName + "\n");
-                    Console.WriteLine("Birth Year: \t" + field.BirthYear + "\n");
-                    Console.WriteLine("Death Year: \t" + field.DeathYear + "\n");
-                    Console.WriteLine("Primary professions: \t" + field.PrimaryProfession + "\n");
-                }
-
-            }
-            Console.WriteLine("-----------------------------END------------------------------------\n");
-        }
-
-        private string AskGeneric(bool isTitle)
-        {
-            // Local variables
-            string option = "";
-
-            if (isTitle)
-            {
-                Console.WriteLine("-----------------------------------------");
-                Console.WriteLine("\n1 - See the series (if the title selected is an episode)\n");
-                Console.WriteLine("2 - See all episodes (if the title selected is a series)\n");
-                Console.WriteLine("3 - See all people that got into this title\n");
-                Console.Write("4 - Go back to main menu\n --> ");
-
-                do
-                {
-                    option = Console.ReadLine();
-                } while (option != "1" && option != "2" && option != "3" && option != "4");
-
-            }
-            else
-            {
-                Console.WriteLine("1 - See the titles that the person is part of\n");
-                Console.Write("2 - Go back to main menu\n --> ");
-                do
-                {
-                    option = Console.ReadLine();
-                } while (option != "1" && option != "2");
-
-            }
             return option;
         }
 
-        private void ShowParent()
-        {
-            Console.Clear();
-
-            q.ProcessParent();
-            Console.WriteLine("Here is the tv series of that episode. It might take some time.");
-            foreach (Details field in q.FilteredParent)
-            {
-                Console.WriteLine("Code: \t" + field.Tconst + "\n");
-                Console.WriteLine("Name: \t" + field.PrimaryTitle + "\n");
-                Console.WriteLine("Original Name: \t" + field.OriginalTitle + "\n");
-                Console.WriteLine("Title Type: \t" + field.TitleType + "\n");
-                Console.WriteLine("Genre: \t" + field.Genres + "\n");
-                Console.WriteLine("Average Rating: \t" + field.AverageRating + "\n");
-                Console.WriteLine("Number of Votes: \t" + field.NumVotes + "\n");
-                Console.WriteLine("Start Year: \t" + field.StartYear + "\n");
-                Console.WriteLine("End Year: \t" + field.EndYear + "\n");
-                Console.WriteLine("Duration: \t" + field.RuntimeMinutes + "\n");
-                Console.WriteLine("Adults Only: \t" + field.IsAdult + "\n");
-            }
-            Console.WriteLine("-----------------------------END------------------------------------\n");
-            AskGeneric(true);
-        }
-
-        private void ShowChildren()
+        public string GetSelectedTitle(Query moviesDB, string criteria = "")
         {
             // Local variable
-            byte i = 0;
             string option = "";
+            byte i = 0;
+            bool morePages = false;
+            bool restart = false;
+            int currentPage = 1;
+            int selectedPage = 1;
+            byte minItem = 255;
+            byte maxItem = 1;
 
-            Console.Clear();
-
-            // Call the function to filter the titles
-            q.ProcessEpisodes();
-
-            Console.WriteLine("Here are the episodes of the series.\n");
-            Console.WriteLine("--------------------------CATEGORIES--------------------------------");
-            Console.WriteLine("Type | Primary Title | For adults? | " +
-                    "Start Year | End Year | Minutes | Genre\n");
-            // Loop that goes through the list of titles that contains the word/s that the user typed
-            foreach (Title field in q.FilteredEpisodes)
+            do
             {
-                Console.WriteLine("-------------------------------------------------------");
-                Console.WriteLine
-                    ("(" + field.ID + ") " + field.TitleType + "| " + field.PrimaryTitle + " | " + field.IsAdult + " | " +
-                    field.StartYear + " | " + field.EndYear + " | " + field.RuntimeMinutes + " |" +
-                    field.Genres + "  - " + " - " + field.Tconst + "\n");
-                i++;
-                if (i > 20)
+                sectionHeader = "List of Titles";
+                Header();
+                Console.WriteLine("Filter Criteria: " + criteria);
+                Console.Write("ITEMS |   TYPES   |");
+                Console.Write("             PRIMARY TITLES             |");
+                Console.WriteLine("YEAR |  GENRE  ");
+                Console.WriteLine(RepeatChar('-', 74));
+                restart = false;
+                // Loop that goes through the list of titles that contains the word/s that the user typed
+                foreach (Title field in moviesDB.FilteredTitles)
                 {
-                    option = AskForID(true);
-                    if (option != "c")
+                    if (currentPage == selectedPage)
                     {
-                        break;
+                        Console.Write("{0,-6}|", "(" + field.ID + ")");
+                        Console.Write("{0,-11}|", field.TitleType);
+                        Console.Write("{0,-40}|", field.PrimaryTitle);
+                        Console.Write("{0,-5}|", field.StartYear);
+                        Console.WriteLine(field.Genres);
+
+                        minItem = (minItem == 255) ? Byte.Parse(field.ID) : minItem;
+                        maxItem = Byte.Parse(field.ID);
+                        i++;
+                        if (i > 19) // end of page
+                        {
+                            morePages = true;
+                            if (currentPage == 1)
+                            {
+                                Console.WriteLine("Please enter the selected ITEM or [Q] to quit, [N] to next page");
+                                option = GetUserChoice("qn", true, minItem, maxItem);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Please enter the selected ITEM or [Q] to quit, [N] to next page, [P] to previous page:");
+                                option = GetUserChoice("qnp", true, minItem, maxItem);
+                            }
+
+                            // User choose or quit
+                            if ((Byte.TryParse(option, out byte bOp)) || (option == "q"))
+                                break;
+
+                            i = 0;
+
+                            if (option == "n")
+                            {
+                                currentPage++;
+                                selectedPage = currentPage;
+                                sectionHeader = "List of Titles";
+                                Header();
+                                Console.WriteLine("Filter Criteria: " + criteria);
+                                Console.Write("ITEMS |   TYPES   |");
+                                Console.Write("             PRIMARY TITLES             |");
+                                Console.WriteLine("YEAR |  GENRE  ");
+                                Console.WriteLine(RepeatChar('-', 74));
+                            }
+                            else
+                            {
+                                restart = true;
+                                selectedPage = currentPage - 1;
+                                currentPage = 1;
+                                break;
+                            }
+                        }
+                        else
+                            morePages = false;
                     }
                     else
                     {
-                        i = 0;
-                        option = "";
+                        i++;
+                        if (i > 19)
+                        {
+                            i = 0;
+                            currentPage++;
+                        }
                     }
                 }
-            }
-            if (option == "")
-            {
-                Console.WriteLine("-----------------------------END------------------------------------");
 
-                option = AskForID(false);
-            }
-            if (option != "v")
-                ShowDetails(option, true);
+                if (!morePages)
+                {
+                    Console.WriteLine("-----------------------------END------------------------------------");
+                    Console.WriteLine("Please enter the selected ITEM or [Q] to quit, [P] to previus page");
+                    option = GetUserChoice("qp", true, minItem, maxItem);
+
+                    if (option == "p")
+                    {
+                        restart = true;
+                        selectedPage = currentPage - 1;
+                        currentPage = 1;
+                    }
+                    else
+                        break;
+                }
+            } while (restart);
+
+            return option;
+
         }
 
-        private void ShowTitlesWithPerson()
+        public string getSelectedPersons(Query moviesDB, string criteria = "")
         {
-            byte i = 0;
+            // Local variable
             string option = "";
+            byte i = 0;
+            bool morePages = false;
+            bool restart = false;
+            int currentPage = 1;
+            int selectedPage = 1;
+            byte minItem = 255;
+            byte maxItem = 1;
 
-            q.ReleaseFiles();
-            q.LoadFiles("titles");
-
-            Console.Clear();
-
-            q.ProcessTitlesWithPerson();
-
-            foreach (Title field in q.FilteredTitlesWithPerson)
+            do
             {
-                Console.WriteLine("-------------------------------------------------------");
-                Console.WriteLine
-                    ("(" + field.ID + ") " + field.TitleType + " | " + field.PrimaryTitle + " | " + field.IsAdult + " | " +
-                    field.StartYear + " | " + field.EndYear + " | " + field.RuntimeMinutes + " | " +
-                    field.Genres + "  - " + field.Tconst + "\n");
-                i++;
-                if (i > 20)
+                sectionHeader = "List of Persons";
+                Header();
+                Console.WriteLine("Filter Criteria: " + criteria);
+                Console.WriteLine("ITEMS\t| Primary Name\t| Primary Professions\n");
+                restart = false;
+                // Loop that goes through the list of persons that contains the word/s that the user typed
+                foreach (Person field in moviesDB.FilteredNames)
                 {
-                    option = AskForID(true);
-                    if (option != "c")
+                    if (currentPage == selectedPage)
                     {
-                        break;
+                        Console.WriteLine
+                            ("(" + field.ID + ")\t|" + field.PrimaryName + "\t| " + field.PrimaryProfession);
+                        minItem = (minItem == 255) ? Byte.Parse(field.ID) : minItem;
+                        maxItem = Byte.Parse(field.ID);
+                        i++;
+                        if (i > 19) // end of page
+                        {
+                            morePages = true;
+                            if (currentPage == 1)
+                            {
+                                Console.WriteLine("Please enter the selected ITEM or [Q] to quit, [N] to next page");
+                                option = GetUserChoice("qn", true, minItem, maxItem);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Please enter the selected ITEM or [Q] to quit, [N] to next page, [P] to previous page:");
+                                option = GetUserChoice("qnp", true, minItem, maxItem);
+                            }
+
+                            // User choose or quit
+                            if ((Byte.TryParse(option, out byte bOp)) || (option == "q"))
+                                break;
+
+                            i = 0;
+
+                            if (option == "n")
+                            {
+                                currentPage++;
+                                selectedPage = currentPage;
+                                sectionHeader = "List of Persons";
+                                Header();
+                                Console.WriteLine("Filter Criteria: " + criteria);
+                                Console.WriteLine("ITEMS\t| Primary Name\t| Primary Professions\n");
+                            }
+                            else
+                            {
+                                restart = true;
+                                selectedPage = currentPage - 1;
+                                currentPage = 1;
+                                break;
+                            }
+                        }
+                        else
+                            morePages = false;
                     }
                     else
                     {
-                        i = 0;
-                        option = "";
+                        i++;
+                        if (i > 19)
+                        {
+                            i = 0;
+                            currentPage++;
+                        }
                     }
                 }
-            }
-            if (option == "")
-            {
-                Console.WriteLine("-----------------------------END------------------------------------");
 
-                option = AskForID(false);
-            }
-            if (option != "v")
-                ShowDetails(option, true);
+                if (!morePages)
+                {
+                    Console.WriteLine("-----------------------------END------------------------------------");
+                    Console.WriteLine("Please enter the selected ITEM or [Q] to quit, [P] to previus page");
+                    option = GetUserChoice("qp", true, minItem, maxItem);
+
+                    if (option == "p")
+                    {
+                        restart = true;
+                        selectedPage = currentPage - 1;
+                        currentPage = 1;
+                    }
+                    else
+                        break;
+                }
+            } while (restart);
+
+            return option;
         }
 
-        private void ShowPeopleInTitle()
+        public string TitleDetails(Query moviesDB)
         {
-            byte i = 0;
-            string option = "";
-
-            q.ReleaseFiles();
-            q.LoadFiles("names");
-
-            Console.Clear();
-
-            q.ProcessPeopleInTitle();
-            Console.WriteLine("Check below the list of people of " + q.CurrentTitleName);
-
-            foreach (Person field in q.FilteredPeopleInTitle)
+            bool hasEpisodes = false;
+            bool hasParent = false;
+            string validOptions = "";
+            sectionHeader = "Detail of Title";
+            Header();
+            foreach (Details field in moviesDB.FilteredDetails)
             {
-                Console.WriteLine("-------------------------------------------------------");
-                Console.WriteLine
-                    ("(" + field.ID + ") " + field.PrimaryName + " - " +
-                    field.PrimaryProfession + " - " + field.Nconst + "\n");
-                i++;
-                if (i > 20)
+                Console.WriteLine("{0,17}: {1}", "Code", field.Tconst);
+                Console.WriteLine("{0,17}: {1}", "Name", field.PrimaryTitle);
+                Console.WriteLine("{0,17}: {1}", "Original Name", field.OriginalTitle);
+                Console.WriteLine("{0,17}: {1}", "Title Type", field.TitleType);
+                Console.WriteLine("{0,17}: {1}", "Genre", field.Genres);
+                Console.WriteLine("{0,17}: {1}", "Average Rating", field.AverageRating);
+                Console.WriteLine("{0,17}: {1}", "Number of Votes", field.NumVotes);
+                Console.WriteLine("{0,17}: {1}", "Start Year", field.StartYear);
+                Console.WriteLine("{0,17}: {1}", "End Year", field.EndYear);
+                Console.WriteLine("{0,17}: {1}", "Duration", field.RuntimeMinutes);
+                Console.WriteLine("{0,17}: {1}", "Adults Only", field.IsAdult);
+                if (field.TitleType == "tvEpisode")
                 {
-                    option = AskForID(true);
-                    if (option != "c")
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        i = 0;
-                        option = "";
-                    }
+                    Console.WriteLine("{0,17}: {1}", "From the series", field.ParentTitle);
+                    Console.WriteLine("{0,17}: {1}", "Season", field.SeasonNumber);
+                    Console.WriteLine("{0,17}: {1}", "Episode", field.EpisodeNumber);
+                    hasParent = true;
                 }
+                hasEpisodes = (field.TitleType == "tvSeries");
             }
-            if (option == "")
+            Console.WriteLine(RepeatChar('-', 15));
+            Console.WriteLine("You have more options:");
+            Console.WriteLine("[T] to search another Title");
+            Console.WriteLine("[P] to list the names/crew (time-consuming)");
+            validOptions = "tp";
+            if (hasEpisodes)
             {
-                Console.WriteLine("-----------------------------END------------------------------------");
-
-                option = AskForID(false);
+                Console.WriteLine("[E] to list the Episodes");
+                validOptions += "e";
             }
-            if (option == "v")
-                ShowDetails(option, false);
+            if (hasParent)
+            {
+                Console.WriteLine("[S] for list the Series");
+                validOptions += "s";
+            }
+            return GetUserChoice(validOptions);
+        }
+
+        public string PersonDetails(Query moviesDB)
+        {
+            sectionHeader = "Detail of Person";
+            Header();
+            foreach (Person field in moviesDB.FilteredNameDetails)
+            {
+                Console.WriteLine("{0,17}: {1}", "Code", field.Nconst);
+                Console.WriteLine("{0,17}: {1}", "Name", field.PrimaryName);
+                Console.WriteLine("{0,17}: {1}", "Birth Year", field.BirthYear);
+                Console.WriteLine("{0,17}: {1}", "Death Year", field.DeathYear);
+                Console.WriteLine("{0,17}: {1}", "Primary professions", field.PrimaryProfession);
+            }
+
+            Console.WriteLine(RepeatChar('-', 15));
+            Console.WriteLine("You have more options:");
+            Console.WriteLine("[P] to search another Person");
+            Console.WriteLine("[T] to list the Titles (time-consuming)");
+            return GetUserChoice("pt");
         }
     }
 }

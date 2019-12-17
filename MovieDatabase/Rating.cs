@@ -18,7 +18,8 @@ namespace MovieDatabase
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="array">The line that contains the info of a rating</param>
+        /// <param name="array">The line that contains the info 
+        /// of a rating</param>
         public Rating(string[] array)
         {
             // Each category has stored an index of the array
@@ -27,9 +28,11 @@ namespace MovieDatabase
             Tconst = array[0];
 
             if (useComma)
-                AverageRating = (array[1] == @"\N") ? -1 : Convert.ToSingle(array[1].Replace(".", ","));
+                AverageRating = (array[1] == @"\N") ? -1 : 
+                    Convert.ToSingle(array[1].Replace(".", ","));
             else
-                AverageRating = (array[1] == @"\N") ? -1 : Convert.ToSingle(array[1]);
+                AverageRating = (array[1] == @"\N") ? -1 : 
+                    Convert.ToSingle(array[1]);
             NumVotes = (array[2] == @"\N") ? -1 : Convert.ToInt32(array[2]);
         }
     }

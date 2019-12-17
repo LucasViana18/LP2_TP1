@@ -21,7 +21,8 @@ namespace MovieDatabase
         /// Constructor
         /// </summary>
         /// <param name="setDataBase">Reference for Query class</param>
-        /// <param name="setInterface">Reference for UserInterface class</param>
+        /// <param name="setInterface">Reference for UserInterface 
+        /// class</param>
         public MainControl(Query setDataBase, UserInterface setInterface)
         {
             moviesDB = setDataBase;
@@ -29,7 +30,8 @@ namespace MovieDatabase
         }
 
         /// <summary>
-        /// Method to execute the start menu or go directly for the queries title or person
+        /// Method to execute the start menu or go directly for the queries 
+        /// title or person
         /// </summary>
         /// <returns>Retorno de erro</returns>
         public byte Execute()
@@ -89,7 +91,8 @@ namespace MovieDatabase
                     filterCriteria = "Titles with '" + toSearch + "'";
                 }
                 moviesDB.SearchForTitles(filterType, toSearch);
-                titleItem = userInterface.GetSelectedTitle(moviesDB, filterCriteria);
+                titleItem = userInterface.GetSelectedTitle
+                    (moviesDB, filterCriteria);
                 if (titleItem != "q")
                 {
                     userInterface.Waiting();
@@ -100,13 +103,15 @@ namespace MovieDatabase
                     {
                         filterType = FilterType.ftEpisodesForSerie;
                         toSearch = moviesDB.CurrentTitleID;
-                        filterCriteria = "Episodes of " + moviesDB.CurrentTitleName;
+                        filterCriteria = "Episodes of " + moviesDB.
+                            CurrentTitleName;
                     }
                     else if (moreOption == "s") // View Serie
                     {
                         filterType = FilterType.ftSerieForEpisode;
                         toSearch = moviesDB.CurrentTitleID;
-                        filterCriteria = "Serie of the episode " + moviesDB.CurrentTitleName;
+                        filterCriteria = "Serie of the episode " + moviesDB.
+                            CurrentTitleName;
                     } 
                     else if (moreOption == "p") // View people
                     {
@@ -140,7 +145,8 @@ namespace MovieDatabase
             {
                 filterType = FilterType.ftPersonsByTitle;
                 toSearch = linkedKey;
-                filterCriteria = "Persons/Crew of " + moviesDB.CurrentTitleName;
+                filterCriteria = "Persons/Crew of " + moviesDB.
+                    CurrentTitleName;
             } 
                 
             moviesDB.ReleaseFiles();
@@ -155,7 +161,8 @@ namespace MovieDatabase
                     filterCriteria = "Person names with " + toSearch;
                 }
                 moviesDB.SearchForPersons(filterType, toSearch);
-                personItem = userInterface.GetSelectedPersons(moviesDB,filterCriteria);
+                personItem = userInterface.GetSelectedPersons
+                    (moviesDB,filterCriteria);
                 if (personItem != "q")
                 {
                     userInterface.Waiting();

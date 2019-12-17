@@ -17,7 +17,8 @@
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="array">The line that contains the info of a person</param>
+        /// <param name="array">The line that contains the info of a 
+        /// person</param>
         public Person(string[] array)
         {
             Nconst = array[0];

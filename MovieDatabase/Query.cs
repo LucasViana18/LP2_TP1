@@ -125,7 +125,8 @@ namespace MovieDatabase
             userInt.ShowLoading("Decompressing database file. Please wait.");
 
             // Process of descompress and being able to read the file
-            FileStream fs = new FileStream(fileToImport, FileMode.Open, FileAccess.Read);
+            FileStream fs = new FileStream
+                (fileToImport, FileMode.Open, FileAccess.Read);
             GZipStream gz = new GZipStream(fs, CompressionMode.Decompress);
             StreamReader sr = new StreamReader(gz);
 
@@ -170,7 +171,9 @@ namespace MovieDatabase
 
                 }
                 if ((processed % 85000) == 0)
-                    userInt.ShowLoading("Importing " + fileName + "...\nProcessed " + processed + " lines. Imported " + imported + " records.");
+                    userInt.ShowLoading("Importing " + fileName + 
+                        "...\nProcessed " + processed + " lines. Imported " + 
+                        imported + " records.");
             }
             // Close the stream reader
             sr.Close();
@@ -216,26 +219,32 @@ namespace MovieDatabase
                              where x.PrimaryTitle.ToLower().Contains(toSearch)
 
                              select new Title(new string[]
-                             {x.Tconst, x.TitleType, x.PrimaryTitle, x.OriginalTitle,
+                             {x.Tconst, x.TitleType, x.PrimaryTitle, 
+                                 x.OriginalTitle,
                               x.IsAdult.ToString(), x.StartYear.ToString(),
-                              x.EndYear.ToString(), x.RuntimeMinutes.ToString(),
+                              x.EndYear.ToString(), 
+                                 x.RuntimeMinutes.ToString(),
                               x.Genres, (ID++).ToString()})).ToList();
                         break;
                     }
                 case FilterType.ftSerieForEpisode:
                     {
-                        // Search and store into an IEnumerable the details of the parent
+                        // Search and store into an IEnumerable the details of 
+                        //the parent
                         FilteredTitles =
                             (from x in titles
-                             join e in episodes on x.Tconst equals e.ParentTconst
+                             join e in episodes on x.Tconst equals 
+                             e.ParentTconst
 
                              where (e.Tconst == toSearch)
 
                              select new Title
                              (new string[]
-                              {x.Tconst, x.TitleType, x.PrimaryTitle, x.OriginalTitle,
+                              {x.Tconst, x.TitleType, x.PrimaryTitle, 
+                                  x.OriginalTitle,
                               x.IsAdult.ToString(), x.StartYear.ToString(),
-                              x.EndYear.ToString(), x.RuntimeMinutes.ToString(),
+                              x.EndYear.ToString(), 
+                                  x.RuntimeMinutes.ToString(),
                               x.Genres, (ID++).ToString()})).ToList();
 
                         break;
@@ -250,9 +259,11 @@ namespace MovieDatabase
 
                              select new Title
                              (new string[]
-                             {x.Tconst, x.TitleType, x.PrimaryTitle, x.OriginalTitle,
+                             {x.Tconst, x.TitleType, x.PrimaryTitle, 
+                                 x.OriginalTitle,
                               x.IsAdult.ToString(), x.StartYear.ToString(),
-                              x.EndYear.ToString(), x.RuntimeMinutes.ToString(),
+                              x.EndYear.ToString(), 
+                                 x.RuntimeMinutes.ToString(),
                               x.Genres, (ID++).ToString()})).ToList();
                         break;
                     }
@@ -261,13 +272,16 @@ namespace MovieDatabase
                         FilteredTitles =
                             (from x in titles
 
-                             where toSearch.Split(',').Any(y => y.Contains(x.Tconst))
+                             where toSearch.Split(',').Any(y => 
+                             y.Contains(x.Tconst))
 
                              select new Title
                              (new string[]
-                             {x.Tconst, x.TitleType, x.PrimaryTitle, x.OriginalTitle,
+                             {x.Tconst, x.TitleType, x.PrimaryTitle, 
+                                 x.OriginalTitle,
                               x.IsAdult.ToString(), x.StartYear.ToString(),
-                              x.EndYear.ToString(), x.RuntimeMinutes.ToString(),
+                              x.EndYear.ToString(), 
+                                 x.RuntimeMinutes.ToString(),
                               x.Genres, (ID++).ToString()})).ToList();
                         break;
                     }
@@ -292,7 +306,8 @@ namespace MovieDatabase
                             (from p in people
                              where p.PrimaryName.ToLower().Contains(toSearch)
                              select new Person(new string[]
-                             {p.Nconst, p.PrimaryName, p.BirthYear, p.DeathYear,
+                             {p.Nconst, p.PrimaryName, p.BirthYear, 
+                                 p.DeathYear,
                               p.PrimaryProfession, p.KnownForTitles,
                               (ID++).ToString()})).ToList();
                         break;
@@ -301,9 +316,11 @@ namespace MovieDatabase
                     {
                         FilteredNames =
                             (from p in people
-                             where p.KnownForTitles.Split(',').Any(x => x.Contains(toSearch))
+                             where p.KnownForTitles.Split(',').Any
+                             (x => x.Contains(toSearch))
                              select new Person(new string[]
-                             {p.Nconst, p.PrimaryName, p.BirthYear, p.DeathYear,
+                             {p.Nconst, p.PrimaryName, p.BirthYear, 
+                                 p.DeathYear,
                               p.PrimaryProfession, p.KnownForTitles,
                               (ID++).ToString()})).ToList();
                         break;
@@ -321,7 +338,8 @@ namespace MovieDatabase
         {
             if (episodeParentID != "")
             {
-                return titles.Find(item => item.Tconst == episodeParentID).PrimaryTitle;
+                return titles.Find(item => item.Tconst == episodeParentID)
+                    .PrimaryTitle;
             }
             else
             {
@@ -338,11 +356,14 @@ namespace MovieDatabase
         {
             if (database == DbType.dtTitles)
             {
-                // Select the details, including ratings, of the title, by ID, that the user typed
+                // Select the details, including ratings, of the title, by ID, 
+                //that the user typed
                 FilteredDetails =
                     (from f in FilteredTitles
-                     join r in ratings on f.Tconst equals r.Tconst into outerRating
-                     join e in episodes on f.Tconst equals e.Tconst into outerEpisodes
+                     join r in ratings on f.Tconst equals r.Tconst into 
+                     outerRating
+                     join e in episodes on f.Tconst equals e.Tconst into 
+                     outerEpisodes
 
                      from oR in outerRating.DefaultIfEmpty()
                      from oE in outerEpisodes.DefaultIfEmpty()
@@ -355,8 +376,10 @@ namespace MovieDatabase
                         f.IsAdult.ToString(), f.StartYear.ToString(),
                         f.EndYear.ToString(), f.RuntimeMinutes.ToString(),
                         f.Genres, oR?.AverageRating.ToString() ?? noRating,
-                        oR?.NumVotes.ToString() ?? noRating, oE?.SeasonNumber ?? "",
-                        oE?.EpisodeNumber ?? "", GetParentTitle(oE?.ParentTconst ?? ""), ""
+                        oR?.NumVotes.ToString() ?? 
+                        noRating, oE?.SeasonNumber ?? "",
+                        oE?.EpisodeNumber ?? "", GetParentTitle
+                        (oE?.ParentTconst ?? ""), ""
                      })).ToList();
 
                 // Set up the current title code and nome
@@ -372,7 +395,8 @@ namespace MovieDatabase
                     (from f in FilteredNames
                      where f.ID == selectedID
                      select new Person(new string[]
-                     {f.Nconst, f.PrimaryName, f.BirthYear, f.DeathYear, f.PrimaryProfession,
+                     {f.Nconst, f.PrimaryName, f.BirthYear, f.DeathYear,
+                         f.PrimaryProfession,
                     f.KnownForTitles,""})).ToList();
 
                 // Set up the current person code and nome

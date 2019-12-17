@@ -22,7 +22,8 @@ namespace MovieDatabase
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="array">The line that contains the info of a title</param>
+        /// <param name="array">The line that contains the info of a 
+        /// title</param>
         public Title(string[] array)
         {
             // Each category has stored an index of the array
@@ -33,7 +34,8 @@ namespace MovieDatabase
             IsAdult = (array[4] == "1") ? true : false;
             StartYear = (array[5] == @"\N") ? -1 : Convert.ToInt32(array[5]);
             EndYear = (array[6] == @"\N") ? -1 : Convert.ToInt32(array[6]);
-            RuntimeMinutes = (array[7] == @"\N") ? -1 : Convert.ToInt32(array[7]);
+            RuntimeMinutes = (array[7] == @"\N") ? -1 : 
+                Convert.ToInt32(array[7]);
             Genres = array[8];
             ID = array[9];
         }

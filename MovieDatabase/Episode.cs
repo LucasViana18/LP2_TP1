@@ -14,7 +14,8 @@
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="array">The line that contains the info of a episode</param>
+        /// <param name="array">The line that contains the info of 
+        /// a episode</param>
         public Episode(string[] array)
         {
             Tconst = array[0];

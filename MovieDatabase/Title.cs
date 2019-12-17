@@ -2,6 +2,9 @@
 
 namespace MovieDatabase
 {
+    /// <summary>
+    /// Stores the categories of the file Title
+    /// </summary>
     public class Title
     {
         // Properties
@@ -16,7 +19,10 @@ namespace MovieDatabase
         public int RuntimeMinutes { get; private set; }
         public string Genres { get; private set; }
 
-        // Constructor
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="array">The line that contains the info of a title</param>
         public Title(string[] array)
         {
             // Each category has stored an index of the array

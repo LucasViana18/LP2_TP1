@@ -2,8 +2,12 @@
 
 namespace MovieDatabase
 {
+    /// <summary>
+    /// Displays to the user the information that he/she needs
+    /// </summary>
     public class UserInterface
     {
+        // Instance variables
         private string sectionHeader;
 
         // Interface Properties
@@ -11,6 +15,9 @@ namespace MovieDatabase
         public string ProgramHeader1 { get; set; }
         public string ProgramHeader2 { get; set; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public UserInterface()
         {
             ProgramName = "IMDB Movie Database";
@@ -19,6 +26,9 @@ namespace MovieDatabase
             ProgramHeader2 = "Data souce: Public database available on IMDb website (https://www.imdb.com/interfaces/)";
         }
 
+        /// <summary>
+        /// The main header of the interface
+        /// </summary>
         public void Header()
         {
             string localHeader = ProgramName + " - " + sectionHeader;
@@ -30,11 +40,21 @@ namespace MovieDatabase
             Console.WriteLine(RepeatChar('-', 60));
         }
 
+        /// <summary>
+        /// Display the waiting message
+        /// </summary>
         public void Waiting()
         {
             Header();
             Console.WriteLine("Please wait...");
         }
+
+        /// <summary>
+        /// Auxiliar method that creates a line
+        /// </summary>
+        /// <param name="character">The char</param>
+        /// <param name="number">The number of characters</param>
+        /// <returns>The line</returns>
         private string RepeatChar(char character, int number)
         {
             string result = "";
@@ -43,7 +63,14 @@ namespace MovieDatabase
             return result;
         }
 
-        // For input the user options
+        /// <summary>
+        /// User input along with restrictions that may lead to error
+        /// </summary>
+        /// <param name="validLetters">Valid letters</param>
+        /// <param name="allowNumbers">Case allow numbers or not</param>
+        /// <param name="minNumber">Minimum number that can type</param>
+        /// <param name="maxNumber">Maximum number that can type</param>
+        /// <returns>The response of the user</returns>
         private string GetUserChoice(string validLetters = "", bool allowNumbers = false, Int16 minNumber = 0, Int16 maxNumber = 999)
         {
             ConsoleKeyInfo response;
@@ -97,6 +124,10 @@ namespace MovieDatabase
             return result;
         }
 
+        /// <summary>
+        /// Displays the start menu
+        /// </summary>
+        /// <returns>User choice</returns>
         public string StartMenu()
         {
             // Draw Header
@@ -109,6 +140,10 @@ namespace MovieDatabase
             return GetUserChoice("", true, 1, 3);
         }
 
+        /// <summary>
+        /// Displays the loading process of files
+        /// </summary>
+        /// <param name="progressMessage">The message</param>
         public void ShowLoading(string progressMessage)
         {
             sectionHeader = "Import File";
@@ -117,6 +152,11 @@ namespace MovieDatabase
             Console.WriteLine(progressMessage);
         }
 
+        /// <summary>
+        /// Display the question for title or person search
+        /// </summary>
+        /// <param name="sectionTitle">Title or Person</param>
+        /// <returns>The option of the user</returns>
         public string SearchFor(string sectionTitle)
         {
             string option;
@@ -144,6 +184,12 @@ namespace MovieDatabase
             return option;
         }
 
+        /// <summary>
+        /// Displays the list of titles searched by the user
+        /// </summary>
+        /// <param name="moviesDB">Query reference</param>
+        /// <param name="criteria">The previous response</param>
+        /// <returns>Returns the selected title</returns>
         public string GetSelectedTitle(Query moviesDB, string criteria = "")
         {
             // Local variable
@@ -255,6 +301,12 @@ namespace MovieDatabase
 
         }
 
+        /// <summary>
+        /// Displays the list of people searched by the user
+        /// </summary>
+        /// <param name="moviesDB">Query reference</param>
+        /// <param name="criteria">The previous response</param>
+        /// <returns>Returns the selected person</returns>
         public string GetSelectedPersons(Query moviesDB, string criteria = "")
         {
             // Local variable
@@ -355,6 +407,11 @@ namespace MovieDatabase
             return option;
         }
 
+        /// <summary>
+        /// Displays the details of the selected title
+        /// </summary>
+        /// <param name="moviesDB">Query reference</param>
+        /// <returns>Returns the option chosen by the user</returns>
         public string TitleDetails(Query moviesDB)
         {
             bool hasEpisodes = false;
@@ -402,6 +459,11 @@ namespace MovieDatabase
             return GetUserChoice(validOptions);
         }
 
+        /// <summary>
+        /// Displays the details of the selected person
+        /// </summary>
+        /// <param name="moviesDB">QUery reference</param>
+        /// <returns>Returns the option chosen by the user</returns>
         public string PersonDetails(Query moviesDB)
         {
             sectionHeader = "Detail of Person";

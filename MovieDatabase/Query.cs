@@ -6,8 +6,12 @@ using System.Linq;
 
 namespace MovieDatabase
 {
+    /// <summary>
+    /// Takes care of the the files and process of queries
+    /// </summary>
     public class Query
     {
+        // Instance variables
         private const string folderName = "MyIMDBSearcher";
         private const string fileTitleBasics = "title.basics.tsv.gz";
         private const string fileTitleRatings = "title.ratings.tsv.gz";
@@ -28,6 +32,7 @@ namespace MovieDatabase
         private List<Episode> episodes;
         private List<Person> people;
 
+        // Instance properties
         public IEnumerable<Title> FilteredTitles { get; private set; }
         public IEnumerable<Details> FilteredDetails { get; set; }
         public IEnumerable<Person> FilteredNameDetails { get; private set; }
@@ -39,6 +44,9 @@ namespace MovieDatabase
         public string CurrentPersonName { get; set; }
         public string CurrentTitlesforPerson { get; set; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public Query()
         {
             folderPath = Path.Combine
@@ -67,7 +75,11 @@ namespace MovieDatabase
 
         // --------------------------------------------------------------------
 
-        // Method to import files from compacted files
+        /// <summary>
+        /// Method to import files from compacted files
+        /// </summary>
+        /// <param name="fileType">Type of file</param>
+        /// <param name="userInt">Reference to UserInterface</param>
         public void LoadFiles(DbType fileType, UserInterface userInt)
         {
             // Local variables
@@ -164,6 +176,10 @@ namespace MovieDatabase
             sr.Close();
         }
 
+        /// <summary>
+        /// Release files to avoid memory leak
+        /// </summary>
+        /// <param name="whatFile">The file</param>
         public void ReleaseFiles(DbType whatFile = DbType.dtAll)
         {
             if (whatFile == DbType.dtTitles || whatFile == DbType.dtAll)
@@ -180,7 +196,11 @@ namespace MovieDatabase
 
         // --------------------------------------------------------------------
 
-        // Search for Titles that contains a string
+        /// <summary>
+        /// Search for Titles that contains a string
+        /// </summary>
+        /// <param name="filterType">Type of file</param>
+        /// <param name="toSearch">String typed by user</param>
         public void SearchForTitles(FilterType filterType, string toSearch)
         {
             // Local variable
@@ -254,6 +274,11 @@ namespace MovieDatabase
             }
         }
 
+        /// <summary>
+        /// Search for People that contains a string
+        /// </summary>
+        /// <param name="filterType">Type of file</param>
+        /// <param name="toSearch">String typed by user</param>
         public void SearchForPersons(FilterType filterType, string toSearch)
         {
             // Local variable
@@ -287,7 +312,11 @@ namespace MovieDatabase
         }
 
         // Methods that filter the results
-
+        /// <summary>
+        /// Gets the parent title of another title (child)
+        /// </summary>
+        /// <param name="episodeParentID">ID of parent</param>
+        /// <returns>Parent title</returns>
         private string GetParentTitle(string episodeParentID)
         {
             if (episodeParentID != "")
@@ -299,6 +328,12 @@ namespace MovieDatabase
                 return "";
             }
         }
+
+        /// <summary>
+        /// Filter and process details of a title or person
+        /// </summary>
+        /// <param name="selectedID"></param>
+        /// <param name="database"></param>
         public void ProcessDetails(string selectedID, DbType database)
         {
             if (database == DbType.dtTitles)

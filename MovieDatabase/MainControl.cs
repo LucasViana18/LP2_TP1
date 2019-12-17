@@ -4,8 +4,12 @@ using System.Text;
 
 namespace MovieDatabase
 {
+    /// <summary>
+    /// Manage and control every action made by the user and the system
+    /// </summary>
     public class MainControl
     {
+        // Instance variables
         private Query moviesDB;
         private UserInterface userInterface;
 
@@ -13,12 +17,21 @@ namespace MovieDatabase
         private string linkedKey = "";
         private bool linkQueries = false;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="setDataBase">Reference for Query class</param>
+        /// <param name="setInterface">Reference for UserInterface class</param>
         public MainControl(Query setDataBase, UserInterface setInterface)
         {
             moviesDB = setDataBase;
             userInterface = setInterface;
         }
 
+        /// <summary>
+        /// Method to execute the start menu or go directly for the queries title or person
+        /// </summary>
+        /// <returns>Retorno de erro</returns>
         public byte Execute()
         {
             bool loop = true;
@@ -42,14 +55,19 @@ namespace MovieDatabase
             return 0;
         }
 
+        /// <summary>
+        /// Takes all the procedure of title searching
+        /// </summary>
         private void QueryByTitle()
         {
+            // Variables
             string toSearch = "";
             string titleItem = "";
             string moreOption = "";
             string filterCriteria = "";
             FilterType filterType = FilterType.ftTitlesByName;
 
+            // Link between title and person
             if (linkQueries)
             {
                 filterType = FilterType.ftTitlesByPerson;
@@ -105,14 +123,19 @@ namespace MovieDatabase
 
         }
 
+        /// <summary>
+        /// Takes all the procedure of person searching
+        /// </summary>
         private void QueryByPerson()
         {
+            // Variables
             string toSearch = "";
             string personItem = "";
             string moreOption = "";
             string filterCriteria = "";
             FilterType filterType = FilterType.ftPersonsByName;
 
+            // Link between title and person
             if (linkQueries)
             {
                 filterType = FilterType.ftPersonsByTitle;
@@ -132,7 +155,7 @@ namespace MovieDatabase
                     filterCriteria = "Person names with " + toSearch;
                 }
                 moviesDB.SearchForPersons(filterType, toSearch);
-                personItem = userInterface.getSelectedPersons(moviesDB,filterCriteria);
+                personItem = userInterface.GetSelectedPersons(moviesDB,filterCriteria);
                 if (personItem != "q")
                 {
                     userInterface.Waiting();

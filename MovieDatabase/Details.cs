@@ -1,5 +1,8 @@
 ﻿namespace MovieDatabase
 {
+    /// <summary>
+    /// Stores the categories of all files
+    /// </summary>
     public class Details
     {
         // Properties
@@ -19,7 +22,10 @@
         public string ParentTitle { get; private set; }
         public string ID { get; private set; }
 
-        // Constructor
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="array"></param>
         public Details(string[] array)
         {
             // Each category has stored an index of the array

@@ -2,6 +2,9 @@
 
 namespace MovieDatabase
 {
+    /// <summary>
+    /// Stores the categories of the file Rating
+    /// </summary>
     public class Rating
     {
         // Properties
@@ -12,7 +15,10 @@ namespace MovieDatabase
         private float floatNum = 3f / 2f;
         private bool useComma;
 
-        // Constructor
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="array">The line that contains the info of a rating</param>
         public Rating(string[] array)
         {
             // Each category has stored an index of the array

@@ -255,7 +255,7 @@ namespace MovieDatabase
 
         }
 
-        public string getSelectedPersons(Query moviesDB, string criteria = "")
+        public string GetSelectedPersons(Query moviesDB, string criteria = "")
         {
             // Local variable
             string option = "";

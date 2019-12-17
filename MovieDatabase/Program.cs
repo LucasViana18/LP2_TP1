@@ -5,10 +5,19 @@
         static void Main(string[] args)
         {
             // Local Instances
-            UserInterface start = new UserInterface();
+            UserInterface userInterface = new UserInterface();
+            Query moviesDB = new Query();
+
+            MainControl control = new MainControl(moviesDB, userInterface);
 
             // Start the program
-            start.StartMenu();
+            byte programResult = control.Execute();
+
+            // End the program
+            userInterface = null;
+            moviesDB = null;
+            System.Environment.Exit(programResult);
+
         }
     }
 }

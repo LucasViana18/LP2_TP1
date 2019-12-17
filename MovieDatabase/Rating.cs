@@ -24,7 +24,7 @@ namespace MovieDatabase
                 AverageRating = (array[1] == @"\N") ? -1 : Convert.ToSingle(array[1].Replace(".", ","));
             else
                 AverageRating = (array[1] == @"\N") ? -1 : Convert.ToSingle(array[1]);
-            NumVotes = (array[2] == @"\N") ? -1 : Convert.ToInt16(array[2]);
+            NumVotes = (array[2] == @"\N") ? -1 : Convert.ToInt32(array[2]);
         }
     }
 }
